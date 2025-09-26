@@ -1,0 +1,87 @@
+﻿@model ProyetoSetilPF.Models.Pasajero
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Pasajero</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Agencia" class="control-label"></label>
+                <input asp-for="Agencia" class="form-control" />
+                <span asp-validation-for="Agencia" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Apellido" class="control-label"></label>
+                <input asp-for="Apellido" class="form-control" />
+                <span asp-validation-for="Apellido" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Nombre" class="control-label"></label>
+                <input asp-for="Nombre" class="form-control" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Edad" class="control-label"></label>
+                <input asp-for="Edad" class="form-control" />
+                <span asp-validation-for="Edad" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SexoId" class="control-label"></label>
+                <select asp-for="SexoId" class ="form-control" asp-items="ViewBag.SexoId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Pasaporte" class="control-label"></label>
+                <input asp-for="Pasaporte" class="form-control" />
+                <span asp-validation-for="Pasaporte" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <img name="FotoPasaporte" id="FotoPasaporte" src="" class="mt-2 mb-2" style="max-width:100px" />
+                <input type="file" id="foto" name="foto" accept="image/jpeg" class="mt-2 mb-2" />
+                <span asp-validation-for="FotoPasaporte" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FechaNacimiento" class="control-label"></label>
+                <input asp-for="FechaNacimiento" class="form-control" />
+                <span asp-validation-for="FechaNacimiento" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RegOpc" class="control-label"></label>
+                <input asp-for="RegOpc" class="form-control" />
+                <span asp-validation-for="RegOpc" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PuntoSubida" class="control-label"></label>
+                <input asp-for="PuntoSubida" class="form-control" />
+                <span asp-validation-for="PuntoSubida" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Telefono" class="control-label"></label>
+                <input asp-for="Telefono" class="form-control" />
+                <span asp-validation-for="Telefono" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Vencimiento" class="control-label"></label>
+                <input asp-for="Vencimiento" class="form-control" />
+                <span asp-validation-for="Vencimiento" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

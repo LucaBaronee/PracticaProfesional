@@ -1,0 +1,131 @@
+﻿@* @model IEnumerable<ProyetoSetilPF.Models.Pasajero> *@
+ @model ProyetoSetilPF.ViewModel.PasajeroVm
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+@using (Html.BeginForm("Index", "Pasajero", FormMethod.Get))
+{
+    <input type="text" name="busqNombre" value="@Model.busquedaNombre" placeholder="Nombre" />
+    <input type="text" name="busqApellido" value="@Model.busquedaApellido" placeholder="Apellido" />
+    <input type="text" name="busqDni" value="@Model.busquedaDni" placeholder="DNI" />
+
+    <label>
+        <input type="checkbox" name="mostrarTodos" value="true"
+        @(Model.MostrarTodos ? "checked" : "") /> Mostrar todos
+    </label>
+
+    <button type="submit" class="btn btn-primary">Buscar</button>
+}
+@* Mostrar mensaje si existe *@
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-info">@TempData["Mensaje"]</div>
+}
+
+@using (Html.BeginForm("ActualizarEstados", "Pasajero", FormMethod.Post, new { @class = "d-inline" }))
+{
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-primary mb-3">Actualizar estados pasajeros</button>
+}
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.pasajero[0].Agencia)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.pasajero[0].Apellido)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.pasajero[0].Nombre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.pasajero[0].Edad)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.pasajero[0].Sexo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.pasajero[0].Pasaporte)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.pasajero[0].FotoPasaporte)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.pasajero[0].FechaNacimiento)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.pasajero[0].RegOpc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.pasajero[0].PuntoSubida)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.pasajero[0].Telefono)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.pasajero[0].Vencimiento)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.pasajero) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Agencia)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Apellido)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nombre)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Edad)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sexo.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Pasaporte)
+            </td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.FotoPasaporte))
+                    {
+                        <img src="~/fotos/@item.FotoPasaporte" style="max-width:50px" />
+                    }
+                </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FechaNacimiento)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RegOpc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PuntoSubida)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Telefono)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Vencimiento)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+<partial name="_Paginador" for="@Model.paginador" />

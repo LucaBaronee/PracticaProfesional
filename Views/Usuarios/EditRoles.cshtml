@@ -1,0 +1,60 @@
+﻿@* @using ProyetoSetilPF.ViewModel
+@model EditUserRolesVM
+
+<h2>Roles de @Model.UserEmail</h2>
+
+<form asp-action="EditRoles" method="post">
+    <input type="hidden" asp-for="UserId" />
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Rol</th>
+                <th>Asignado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Roles.Count; i++)
+            {
+                <tr>
+                    <td>@Model.Roles[i].RoleName</td>
+                    <td>
+                        <input asp-for="Roles[i].Selected" type="checkbox" />
+                        <input asp-for="Roles[i].RoleName" type="hidden" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-success">Guardar</button>
+</form> *@
+
+@model ProyetoSetilPF.ViewModel.EditUserRolesVM
+
+<h2>Roles de @Model.UserEmail</h2>
+
+<form asp-action="EditRoles" method="post">
+    <input type="hidden" asp-for="UserId" />
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Rol</th>
+                <th>Asignado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Roles.Count; i++)
+            {
+                <tr>
+                    <td>@Model.Roles[i].RoleName</td>
+                    <td>
+                        <input asp-for="Roles[i].Selected" type="checkbox" />
+                        <input asp-for="Roles[i].RoleName" type="hidden" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-success">Guardar</button>
+</form>

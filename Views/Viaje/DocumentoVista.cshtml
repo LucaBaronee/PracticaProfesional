@@ -1,0 +1,34 @@
+﻿@model ProyetoSetilPF.Models.Viaje
+
+@{
+    ViewData["Title"] = "Documentos del Viaje";
+}
+
+<h2>Documentos del viaje: @Model.Descripcion</h2>
+
+@if (Model.DocumentosViaje.Any())
+{
+    <ul>
+        @foreach (var doc in Model.DocumentosViaje)
+        {
+            <li style="margin-bottom:5px;">
+                <a href="@doc.RutaArchivo" target="_blank">@doc.NombreArchivo</a>
+
+                <!-- Botón Eliminar con confirmación -->
+                <form asp-action="EliminarDocumento" method="post" style="display:inline;"
+                      onsubmit="return confirm('¿Está seguro que desea eliminar este archivo?');">
+                    <input type="hidden" name="documentoId" value="@doc.Id" />
+                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                </form>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>No hay archivos cargados para este viaje.</p>
+}
+
+<p>
+    <a asp-action="Index" class="btn btn-secondary">Volver a viajes</a>
+</p>

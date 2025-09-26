@@ -1,0 +1,70 @@
+﻿@* @model IEnumerable<Microsoft.AspNetCore.Identity.IdentityUser>
+
+<h2>Usuarios Registrados</h2>
+
+@if (!Model.Any())
+{
+    <div>No hay usuarios.</div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Id</th>
+                <th>Opciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.Email</td>
+                <td>@user.Id</td>
+                <td>
+                    <a asp-controller="Usuarios" asp-action="EditRoles" asp-route-id="@user.Id" class="btn btn-primary">
+                        Editar roles
+                    </a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+} *@
+
+
+@model IEnumerable<Microsoft.AspNetCore.Identity.IdentityUser>
+
+<h2>Usuarios Registrados</h2>
+
+@if (!Model.Any())
+{
+    <div>No hay usuarios.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Id</th>
+                <th>Opciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.Email</td>
+                    <td>@user.Id</td>
+                    <td>
+                        <a asp-controller="Usuarios" asp-action="EditRoles" asp-route-id="@user.Id" class="btn btn-primary">
+                            Editar roles
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

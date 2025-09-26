@@ -1,0 +1,27 @@
+﻿@model ProyetoSetilPF.Models.Viaje
+
+<h2>Movimientos de @Model.Descripcion</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Descripción</th>
+            <th>Monto</th>
+            <th>Tipo</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var mov in Model.MovimientosViaje)
+        {
+            <tr>
+                <td>@mov.Fecha.ToString("dd/MM/yyyy")</td>
+                <td>@mov.Descripcion</td>
+                <td>@mov.Monto</td>
+                <td>@mov.TipoMovimiento.Descripcion</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Index" class="btn btn-secondary">Volver a Viajes</a>

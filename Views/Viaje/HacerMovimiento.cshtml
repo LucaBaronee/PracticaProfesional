@@ -1,0 +1,27 @@
+﻿@model ProyetoSetilPF.Models.MovimientoViaje
+
+<h2>Añadir movimiento</h2>
+
+<form asp-action="HacerMovimiento">
+    <input type="hidden" asp-for="ViajeId" />
+
+    <div class="form-group">
+        <label asp-for="Descripcion"></label>
+        <input asp-for="Descripcion" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Monto"></label>
+        <input asp-for="Monto" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="TipoMovimientoId"></label>
+        <select asp-for="TipoMovimientoId"
+                asp-items="ViewBag.TipoMovimientos"
+                class="form-control">
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-success">Guardar</button>
+</form>

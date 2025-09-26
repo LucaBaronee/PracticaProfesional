@@ -1,0 +1,23 @@
+﻿@model ProyetoSetilPF.ViewModel.Paginador
+Total Paginas: @Model.TotalPaginas
+Total Registros: @Model.TotalRegistros
+<nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+        @if (Model.PaginaActual != 1)
+        {
+            <li class="page-item @(Model.PaginaActual == 1 ? "disabled" : "")">
+                <a class="page-link" asp-all-route-data="@Model.ValoresQueryString" asp-route-pagina="@(Model.PaginaActual - 1)" tabindex="-1" aria-disabled="true">Anterior</a>
+            </li>
+        }
+        <li class="page-item active" aria-current="page">
+            <a class="page-link" href="#">@Model.PaginaActual</a>
+        </li>
+        @if (Model.TotalPaginas >= (Model.PaginaActual + 1))
+        {
+            <li class="page-item"><a class="page-link" asp-all-route-data="@Model.ValoresQueryString" asp-route-pagina="@(Model.PaginaActual + 1)">@(Model.PaginaActual + 1)</a></li>
+            <li class="page-item">
+                <a class="page-link" asp-all-route-data="@Model.ValoresQueryString" asp-route-pagina="@(Model.PaginaActual + 1)">Siguiente</a>
+            </li>
+        }
+    </ul>
+</nav>

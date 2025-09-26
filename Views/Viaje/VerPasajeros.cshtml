@@ -1,0 +1,31 @@
+﻿@model IEnumerable<ProyetoSetilPF.Models.Pasajero>
+
+<h2>Pasajeros del Viaje</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>DNI</th>
+            <th>Pasaporte</th>
+            <th>Detalles</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var pasajero in Model)
+        {
+            <tr>
+                <td>@pasajero.Nombre</td>
+                <td>@pasajero.Apellido</td>
+                <td>@pasajero.Pasaporte</td>
+                <td>@pasajero.Pasaporte</td>
+                <td>
+                    <a asp-controller="Pasajero" asp-action="Details" asp-route-id="@pasajero.Id" class="btn btn-sm btn-info">Ver</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Index" class="btn btn-secondary">Volver a Viajes</a>
