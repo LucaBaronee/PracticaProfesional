@@ -143,9 +143,10 @@ namespace ProyetoSetilPF.Controllers
         }
 
         // GET: Pasajero/Create
-        public IActionResult Create()
+        public IActionResult Create(int? viajeId)
         {
-            ViewData["SexoId"] = new SelectList(_context.Sexo, "Id", "Id");
+            ViewData["SexoId"] = new SelectList(_context.Sexo, "Id", "Descripcion");
+            ViewBag.ViajeId = viajeId;
             return View();
         }
 
@@ -154,16 +155,23 @@ namespace ProyetoSetilPF.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Agencia,Apellido,Nombre,Edad,SexoId,Pasaporte,FotoPasaporte,FechaNacimiento,RegOpc,PuntoSubida,Telefono,Vencimiento")] Pasajero pasajero)
+        public async Task<IActionResult> Create([Bind("Id,Agencia,Apellido,Nombre,Edad,SexoId,Pasaporte,FotoPasaporte,FechaNacimiento,Telefono,Vencimiento")] Pasajero pasajero, int? viajeId)
         {
             if (ModelState.IsValid)
             {
                 pasajero.FotoPasaporte =cargarFoto("");
                 _context.Add(pasajero);
                 await _context.SaveChangesAsync();
+                if (viajeId.HasValue)
+                {
+                    return RedirectToAction("AgregarPasajero", "Viaje", new { viajeId = viajeId.Value });
+                }
+
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["SexoId"] = new SelectList(_context.Sexo, "Id", "Id", pasajero.SexoId);
+            ViewData["SexoId"] = new SelectList(_context.Sexo, "Id", "Descripcion", pasajero.SexoId);
+            ViewBag.ViajeId = viajeId;
             return View(pasajero);
         }
 
@@ -180,7 +188,7 @@ namespace ProyetoSetilPF.Controllers
             {
                 return NotFound();
             }
-            ViewData["SexoId"] = new SelectList(_context.Sexo, "Id", "Id", pasajero.SexoId);
+            ViewData["SexoId"] = new SelectList(_context.Sexo, "Id", "Descripcion", pasajero.SexoId);
             return View(pasajero);
         }
 
@@ -189,7 +197,7 @@ namespace ProyetoSetilPF.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Agencia,Apellido,Nombre,Edad,SexoId,Pasaporte,FotoPasaporte,FechaNacimiento,RegOpc,PuntoSubida,Telefono,Vencimiento")] Pasajero pasajero)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Agencia,Apellido,Nombre,Edad,SexoId,Pasaporte,FotoPasaporte,FechaNacimiento,Telefono,Vencimiento")] Pasajero pasajero)
         {
             if (id != pasajero.Id)
             {
@@ -217,7 +225,7 @@ namespace ProyetoSetilPF.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["SexoId"] = new SelectList(_context.Sexo, "Id", "Id", pasajero.SexoId);
+            ViewData["SexoId"] = new SelectList(_context.Sexo, "Id", "Descripcion", pasajero.SexoId);
             return View(pasajero);
         }
 

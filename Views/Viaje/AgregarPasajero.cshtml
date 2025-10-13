@@ -1,0 +1,51 @@
+﻿@model IEnumerable<ProyetoSetilPF.Models.Pasajero>
+
+@{
+    ViewData["Title"] = "Agregar Pasajero al Viaje";
+}
+
+<h2>Agregar Pasajero</h2>
+
+<form method="get" asp-action="AgregarPasajero" class="mb-3">
+    <input type="hidden" name="viajeId" value="@ViewBag.ViajeId" />
+    <div class="input-group">
+        <input type="text" name="busqueda" class="form-control" placeholder="Buscar por nombre, apellido o pasaporte" value="@ViewBag.Busqueda" />
+        <button type="submit" class="btn btn-primary">Buscar</button>
+        <a asp-controller="Pasajero" asp-action="Create" asp-route-viajeId="@ViewBag.ViajeId" class="btn btn-success ms-2">
+            <i class="bi bi-person-plus"></i> Nuevo Pasajero
+        </a>
+    </div>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Pasaporte</th>
+            <th>Agregar</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var pasajero in Model)
+        {
+            <tr>
+                <td>@pasajero.Nombre</td>
+                <td>@pasajero.Apellido</td>
+                <td>@pasajero.Pasaporte</td>
+                <td>
+                    <form method="post" asp-action="AgregarPasajero">
+                        <input type="hidden" name="viajeId" value="@ViewBag.ViajeId" />
+                        <input type="hidden" name="pasajeroId" value="@pasajero.Id" />
+                        <button type="submit" class="btn btn-success btn-sm">
+                            <i class="bi bi-person-check-fill"></i> Agregar
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="VerPasajeros" asp-route-id="@ViewBag.ViajeId" class="btn btn-secondary mt-3">Volver a Pasajeros</a>
