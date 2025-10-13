@@ -12,8 +12,6 @@
         public string Pasaporte { get; set; }
         public string? FotoPasaporte { get; set; }
         public DateTime FechaNacimiento { get; set; }
-        public string RegOpc {  get; set; }
-        public string PuntoSubida { get; set; }
         public int Telefono { get; set; }
         public DateTime Vencimiento { get; set; }
         public List<ViajePasajero>? ViajePasajero { get; set; }
