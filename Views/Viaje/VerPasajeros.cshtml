@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ProyetoSetilPF.Models.Pasajero>
+﻿@model IEnumerable<ProyetoSetilPF.Models.ViajePasajero>
 
 <h2 class="mb-4">Pasajeros del Viaje</h2>
 
@@ -7,27 +7,29 @@
     <thead class="table-dark">
         <tr>
             <th>Nombre</th>
-            <th>Apellido</th>            
+            <th>Apellido</th>
             <th>Pasaporte</th>
+            <th>Agencia</th>
             <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var pasajero in Model)
+        @foreach (var vp in Model)
         {
             <tr>
-                <td>@pasajero.Nombre</td>
-                <td>@pasajero.Apellido</td>
-                <td>@pasajero.Pasaporte</td>
+                <td>@vp.Pasajero.Nombre</td>
+                <td>@vp.Pasajero.Apellido</td>
+                <td>@vp.Pasajero.Pasaporte</td>
+                <td>@vp.Agencia?.Nombre</td> <!-- Agencia asignada -->
                 <td>
-                    <a asp-controller="Pasajero" asp-action="Details" asp-route-id="@pasajero.Id" class="btn btn-sm btn-info">
+                    <a asp-controller="Pasajero" asp-action="Details" asp-route-id="@vp.Pasajero.Id" class="btn btn-sm btn-info">
                         <i class="bi bi-eye-fill me-1"></i> Ver
                     </a>
-                    <form asp-action="EliminarPasajeroDelViaje" method="post" onsubmit="return confirm('¿Seguro que deseas quitar este pasajero del viaje?');">
+                    <form asp-action="EliminarPasajeroDelViaje" method="post" onsubmit="return confirm('¿Seguro que deseas quitar este pasajero del viaje?');" class="d-inline">
                         <input type="hidden" name="viajeId" value="@ViewBag.ViajeId" />
-                        <input type="hidden" name="pasajeroId" value="@pasajero.Id" />
+                        <input type="hidden" name="pasajeroId" value="@vp.Pasajero.Id" />
                         <button type="submit" class="btn btn-sm btn-danger">
-                            <i class="bi bi-person-dash-fill me-1"></i> Quitar
+                              <i class="bi bi-person-dash-fill me-1"></i> Quitar
                         </button>
                     </form>
                 </td>

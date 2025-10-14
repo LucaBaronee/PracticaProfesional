@@ -13,12 +13,7 @@
         @* <form asp-action="Create" enctype="multipart/form-data"> *@
         <form asp-action="Create" method="post" enctype="multipart/form-data">
             <input type="hidden" name="viajeId" value="@ViewBag.ViajeId" />
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Agencia" class="control-label"></label>
-                <input asp-for="Agencia" class="form-control" />
-                <span asp-validation-for="Agencia" class="text-danger"></span>
-            </div>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>          
             <div class="form-group">
                 <label asp-for="Apellido" class="control-label"></label>
                 <input asp-for="Apellido" class="form-control" />
@@ -28,11 +23,6 @@
                 <label asp-for="Nombre" class="control-label"></label>
                 <input asp-for="Nombre" class="form-control" />
                 <span asp-validation-for="Nombre" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Edad" class="control-label"></label>
-                <input asp-for="Edad" class="form-control" />
-                <span asp-validation-for="Edad" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="SexoId" class="control-label"></label>

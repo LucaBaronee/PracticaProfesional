@@ -175,6 +175,7 @@
                             <th>Fecha Ida</th>
                             <th>Fecha Vuelta</th>
                             <th>Balance</th>
+                            <th>Moneda</th>
                             <th>Ciudades</th>
                             <th>Pasajeros</th>
                             <th>Coordinadores</th>
@@ -188,8 +189,10 @@
                                 <td class="fw-semibold">@item.Descripcion</td>
                                 <td>@item.FechaIda.ToString("dd/MM/yyyy")</td>
                                 <td>@item.FechaVuelta.ToString("dd/MM/yyyy")</td>
-                                <td class="fw-bold text-success">@item.Balance.ToString("C")</td>
-
+                                <td class="fw-bold text-success">
+                                    @($"{item.Moneda?.Simbolo}{item.Balance:N2}")
+                                </td>
+                                <td class="fw-semibold">@($"{item.Moneda?.Simbolo} {item.Moneda.CodigoIso}")</td>
                                 <td class="text-center">
                                     <a asp-action="VerCiudad" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary rounded-pill">
                                         <i class="bi bi-geo-alt-fill me-1"></i> Ver

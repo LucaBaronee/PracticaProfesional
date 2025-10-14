@@ -37,10 +37,7 @@
 }
 <table class="table">
     <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.pasajero[0].Agencia)
-            </th>
+        <tr>           
             <th>
                 @Html.DisplayNameFor(model => model.pasajero[0].Apellido)
             </th>
@@ -74,9 +71,7 @@
     <tbody>
 @foreach (var item in Model.pasajero) {
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Agencia)
-            </td>
+            
             <td>
                 @Html.DisplayFor(modelItem => item.Apellido)
             </td>

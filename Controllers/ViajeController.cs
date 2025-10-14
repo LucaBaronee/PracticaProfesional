@@ -44,57 +44,6 @@ namespace ProyetoSetilPF.Controllers
                 .AnyAsync(vc => vc.ViajeId == viajeId && vc.Coordinador.Email == email);
         }
         [Authorize]
-        //// GET: Viaje
-        //public async Task<IActionResult> Index(int pagina = 1)
-        //{
-        //    IQueryable<Viaje> applicationDbContext;
-
-        //    if (User.IsInRole("Admin") || User.IsInRole("Administracion"))
-        //    {
-        //        applicationDbContext = _context.Viaje;
-        //    }
-        //    else
-        //    {
-        //        var email = User.Identity.Name;
-
-        //        // Solo viajes asignados al coordinador logueado
-        //        applicationDbContext = _context.Viaje
-        //            .Where(v => v.ViajeCoordinador
-        //                .Any(vc => vc.Coordinador.Email == email));
-        //    }
-
-        //    var viajes = await applicationDbContext
-        //        .Include(v => v.ViajeCiudad).ThenInclude(vc => vc.Ciudad)
-        //        .Include(v => v.ViajeCoordinador).ThenInclude(vc => vc.Coordinador).ThenInclude(c => c.User)
-        //        .Include(v => v.ViajePasajero).ThenInclude(vp => vp.Pasajero)
-        //        .Include(v => v.MovimientosViaje).ThenInclude(v => v.TipoMovimiento)
-        //        .Include(v => v.DocumentosViaje)
-        //        .ToListAsync();
-
-        //    Paginador paginas = new Paginador
-        //    {
-        //        PaginaActual = pagina,
-        //        RegistrosPorPagina = 5,
-        //        TotalRegistros = applicationDbContext.Count()
-        //    };
-
-        //    var mostrarRegistros = applicationDbContext
-        //        .Skip((pagina - 1) * paginas.RegistrosPorPagina)
-        //        .Take(paginas.RegistrosPorPagina);
-
-        //    ViajeVM datos = new ViajeVM
-        //    {
-        //        viaje = mostrarRegistros.ToList(),
-        //        paginador = paginas
-        //    };
-
-        //    return View(datos);
-        //}
-
-
-
-
-
         // GET: Viaje
         public async Task<IActionResult> Index(string busquedaNombre, bool ordenDesc = true, int pagina = 1)
         {
@@ -132,7 +81,8 @@ namespace ProyetoSetilPF.Controllers
                 .Include(v => v.ViajeCoordinador).ThenInclude(vc => vc.Coordinador).ThenInclude(c => c.User)
                 .Include(v => v.ViajePasajero).ThenInclude(vp => vp.Pasajero)
                 .Include(v => v.MovimientosViaje).ThenInclude(v => v.TipoMovimiento)
-                .Include(v => v.DocumentosViaje);
+                .Include(v => v.DocumentosViaje)
+                .Include(v=>v.Moneda);
 
             // 🔹 Orden por fecha de ida
             applicationDbContext = ordenDesc
@@ -249,10 +199,11 @@ namespace ProyetoSetilPF.Controllers
         // GET: Viaje/Create
         public IActionResult Create()
         {
-
+            ViewBag.MonedaId = new SelectList(_context.Moneda, "Id", "Nombre");
             ViewBag.Ciudad = new MultiSelectList(_context.Ciudad, "Id", "Descripcion");
             ViewBag.Pasajero = new MultiSelectList(_context.Pasajero, "Id", "Pasaporte");
             ViewBag.Coordinador = new MultiSelectList(_context.Coordinador, "Id", "Pasaporte");
+
 
             return View();
         }
@@ -262,7 +213,7 @@ namespace ProyetoSetilPF.Controllers
         [Authorize(Roles = "Admin,Administracion")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Descripcion,FechaIda,FechaVuelta,Balance")] Viaje viaje, int[] ciudadIds, int[] pasajeroIds, int[] coordinadorIds)
+        public async Task<IActionResult> Create([Bind("Id,Descripcion,FechaIda,FechaVuelta,Balance,MonedaId")] Viaje viaje, int[] ciudadIds, int[] pasajeroIds, int[] coordinadorIds)
         {
             if (ModelState.IsValid)
             {
@@ -311,6 +262,7 @@ namespace ProyetoSetilPF.Controllers
             var ciudades = await _context.Ciudad.ToListAsync() ?? new List<Ciudad>();
             var pasajeros = await _context.Pasajero.ToListAsync() ?? new List<Pasajero>();
             var coordinadores = await _context.Coordinador.ToListAsync() ?? new List<Coordinador>();
+            ViewBag.MonedaId = new SelectList(_context.Moneda, "Id", "Nombre");
             ViewBag.Ciudad = new MultiSelectList(await _context.Ciudad.ToListAsync(), "Id", "Descripcion", ciudadIds);
             ViewBag.Pasajero = new MultiSelectList(await _context.Pasajero.ToListAsync(), "Id", "Pasaporte", pasajeroIds);
             ViewBag.Coordinador = new MultiSelectList(await _context.Coordinador.ToListAsync(), "Id", "Pasaporte", coordinadorIds);
@@ -420,7 +372,7 @@ namespace ProyetoSetilPF.Controllers
         {
             return _context.Viaje.Any(e => e.Id == id);
         }
-       
+
         [Authorize]
         public async Task<IActionResult> VerPasajeros(int? id)
         {
@@ -429,6 +381,8 @@ namespace ProyetoSetilPF.Controllers
             var viaje = await _context.Viaje
                 .Include(v => v.ViajePasajero)
                     .ThenInclude(vp => vp.Pasajero)
+                .Include(v => v.ViajePasajero)
+                    .ThenInclude(vp => vp.Agencia) // 🔹 incluir agencia
                 .FirstOrDefaultAsync(v => v.Id == id);
 
             if (viaje == null) return NotFound();
@@ -444,7 +398,8 @@ namespace ProyetoSetilPF.Controllers
             ViewBag.ViajeId = id;
             ViewBag.PasajerosDisponibles = new SelectList(disponibles, "Id", "Nombre");
 
-            return View(viaje.ViajePasajero.Select(vp => vp.Pasajero).ToList());
+            // 🔹 Retornar la lista de ViajePasajero completos
+            return View(viaje.ViajePasajero.ToList());
         }
         // GET: Viaje/HacerMovimiento/5
         [Authorize(Roles = "Admin,Coordinador")]
@@ -632,24 +587,7 @@ namespace ProyetoSetilPF.Controllers
         [Authorize(Roles = "Admin,Administracion")]
         [HttpPost]
         [Authorize(Roles = "Admin,Administracion")]
-        //public async Task<IActionResult> AgregarCoordinador(int viajeId, int coordinadorId)
-        //{
-        //    var existe = await _context.ViajeCoordinador
-        //        .AnyAsync(vc => vc.ViajeId == viajeId && vc.CoordinadorId == coordinadorId);
-
-        //    if (!existe)
-        //    {
-        //        var vc = new ViajeCoordinador
-        //        {
-        //            ViajeId = viajeId,
-        //            CoordinadorId = coordinadorId
-        //        };
-        //        _context.ViajeCoordinador.Add(vc);
-        //        await _context.SaveChangesAsync();
-        //    }
-
-        //    return RedirectToAction("VerCoordinador", new { id = viajeId });
-        //}
+        
 
         [HttpPost]
         [Authorize(Roles = "Admin,Administracion")]
@@ -673,6 +611,53 @@ namespace ProyetoSetilPF.Controllers
         }
 
         // GET: Viaje/AgregarPasajero
+        //[Authorize(Roles = "Admin,Administracion")]
+        //public async Task<IActionResult> AgregarPasajero(int viajeId, string busqueda = "")
+        //{
+        //    var viaje = await _context.Viaje.FindAsync(viajeId);
+        //    if (viaje == null) return NotFound();
+
+        //    // Pasajeros ya asignados
+        //    var pasajerosAsignadosIds = _context.ViajePasajero
+        //        .Where(vp => vp.ViajeId == viajeId)
+        //        .Select(vp => vp.PasajeroId)
+        //        .ToList();
+
+        //    // Filtrar pasajeros disponibles por búsqueda
+        //    var pasajeros = _context.Pasajero
+        //        .Where(p => !pasajerosAsignadosIds.Contains(p.Id) &&
+        //                    (p.Nombre.Contains(busqueda) ||
+        //                     p.Apellido.Contains(busqueda) ||
+        //                     p.Pasaporte.Contains(busqueda)))
+        //        .ToList();
+
+        //    ViewBag.ViajeId = viajeId;
+        //    ViewBag.Busqueda = busqueda;
+
+        //    return View(pasajeros);
+        //}
+
+        //// POST: Viaje/AgregarPasajero
+        //[Authorize(Roles = "Admin,Administracion")]
+        //[HttpPost]
+        //public async Task<IActionResult> AgregarPasajero(int viajeId, int pasajeroId)
+        //{
+        //    var existe = await _context.ViajePasajero
+        //        .AnyAsync(vp => vp.ViajeId == viajeId && vp.PasajeroId == pasajeroId);
+
+        //    if (!existe)
+        //    {
+        //        _context.ViajePasajero.Add(new ViajePasajero
+        //        {
+        //            ViajeId = viajeId,
+        //            PasajeroId = pasajeroId
+        //        });
+        //        await _context.SaveChangesAsync();
+        //    }
+
+        //    return RedirectToAction("VerPasajeros", new { id = viajeId });
+        //}
+
         [Authorize(Roles = "Admin,Administracion")]
         public async Task<IActionResult> AgregarPasajero(int viajeId, string busqueda = "")
         {
@@ -693,32 +678,53 @@ namespace ProyetoSetilPF.Controllers
                              p.Pasaporte.Contains(busqueda)))
                 .ToList();
 
+            // Agencias para el dropdown
+            ViewBag.Agencias = _context.Agencia
+                .Select(a => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Value = a.Id.ToString(),
+                    Text = a.Nombre
+                }).ToList();
+
             ViewBag.ViajeId = viajeId;
             ViewBag.Busqueda = busqueda;
 
             return View(pasajeros);
         }
 
-        // POST: Viaje/AgregarPasajero
         [Authorize(Roles = "Admin,Administracion")]
         [HttpPost]
-        public async Task<IActionResult> AgregarPasajero(int viajeId, int pasajeroId)
+        public async Task<IActionResult> AgregarPasajero(int viajeId, int pasajeroId, int agenciaId)
         {
+            // Validar que no exista ya
             var existe = await _context.ViajePasajero
                 .AnyAsync(vp => vp.ViajeId == viajeId && vp.PasajeroId == pasajeroId);
 
             if (!existe)
             {
+                // Validar que exista la agencia
+                var agencia = await _context.Agencia.FindAsync(agenciaId);
+                if (agencia == null)
+                {
+                    ModelState.AddModelError("", "La agencia seleccionada no existe.");
+                    return RedirectToAction("AgregarPasajero", new { viajeId });
+                }
+
                 _context.ViajePasajero.Add(new ViajePasajero
                 {
                     ViajeId = viajeId,
-                    PasajeroId = pasajeroId
+                    PasajeroId = pasajeroId,
+                    AgenciaId = agenciaId
                 });
                 await _context.SaveChangesAsync();
             }
 
             return RedirectToAction("VerPasajeros", new { id = viajeId });
         }
+
+
+
+
 
         [Authorize(Roles = "Admin,Administracion")]
         public async Task<IActionResult> AgregarCoordinador(int viajeId, string busqueda = "")

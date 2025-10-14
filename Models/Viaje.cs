@@ -21,7 +21,8 @@ namespace ProyetoSetilPF.Models
         public DateTime FechaVuelta { get; set; }
 
         public decimal Balance { get; set; }
-
+        public int MonedaId { get; set; }
+        public Moneda? Moneda { get; set; }
         public bool Activo { get; set; } = true;
 
         public List<MovimientoViaje>? MovimientosViaje { get; set; }

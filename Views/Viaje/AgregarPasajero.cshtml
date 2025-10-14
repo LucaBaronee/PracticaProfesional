@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ProyetoSetilPF.Models.Pasajero>
+﻿@* @model IEnumerable<ProyetoSetilPF.Models.Pasajero>
 
 @{
     ViewData["Title"] = "Agregar Pasajero al Viaje";
@@ -48,4 +48,72 @@
     </tbody>
 </table>
 
+<a asp-action="VerPasajeros" asp-route-id="@ViewBag.ViajeId" class="btn btn-secondary mt-3">Volver a Pasajeros</a> *@
+
+
+@model IEnumerable<ProyetoSetilPF.Models.Pasajero>
+
+@{
+    ViewData["Title"] = "Agregar Pasajero al Viaje";
+    var agencias = ViewBag.Agencias as List<SelectListItem>; // pasadas desde el controlador
+}
+
+<h2>Agregar Pasajero</h2>
+
+<form method="get" asp-action="AgregarPasajero" class="mb-3">
+    <input type="hidden" name="viajeId" value="@ViewBag.ViajeId" />
+    <div class="input-group">
+        <input type="text" name="busqueda" class="form-control" placeholder="Buscar por nombre, apellido o pasaporte" value="@ViewBag.Busqueda" />
+        <button type="submit" class="btn btn-primary">Buscar</button>
+        <a asp-controller="Pasajero" asp-action="Create" asp-route-viajeId="@ViewBag.ViajeId" class="btn btn-success ms-2">
+            <i class="bi bi-person-plus"></i> Nuevo Pasajero
+        </a>
+    </div>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Pasaporte</th>
+            <th>Agencia</th>
+            <th>Agregar</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var pasajero in Model)
+        {
+            <tr>
+                <td>@pasajero.Nombre</td>
+                <td>@pasajero.Apellido</td>
+                <td>@pasajero.Pasaporte</td>
+                <td>
+                    <select name="agenciaId_@pasajero.Id" class="form-select form-select-sm">
+                        <option value="">-- Seleccione agencia --</option>
+                        @foreach (var agencia in agencias)
+                        {
+                            <option value="@agencia.Value">@agencia.Text</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <form method="post" asp-action="AgregarPasajero" class="d-flex">
+                        <input type="hidden" name="viajeId" value="@ViewBag.ViajeId" />
+                        <input type="hidden" name="pasajeroId" value="@pasajero.Id" />
+                        <input type="hidden" name="agenciaId" value="" id="hiddenAgencia_@pasajero.Id" />
+                        <button type="submit" class="btn btn-success btn-sm"
+                                onclick="document.getElementById('hiddenAgencia_@pasajero.Id').value = document.getElementsByName('agenciaId_@pasajero.Id')[0].value;">
+                            <i class="bi bi-person-check-fill"></i> Agregar
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
 <a asp-action="VerPasajeros" asp-route-id="@ViewBag.ViajeId" class="btn btn-secondary mt-3">Volver a Pasajeros</a>
+
+
+

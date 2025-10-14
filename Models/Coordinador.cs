@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProyetoSetilPF.Models
 {
@@ -7,7 +8,6 @@ namespace ProyetoSetilPF.Models
         public int Id { get; set; }
         public string Apellido { get; set; }
         public string Nombre { get; set; }
-        public int Edad { get; set; }
         public int SexoId { get; set; }
         public Sexo? Sexo { get; set; }
         public string Pasaporte { get; set; }
@@ -24,5 +24,20 @@ namespace ProyetoSetilPF.Models
         // 🔑 Relación con IdentityUser
         public string? UserId { get; set; }   // ID del usuario en AspNetUsers
         public IdentityUser? User { get; set; } // Navegación al usuario (para acceder al Email, UserName, etc.)
+
+        [NotMapped]
+        public int Edad
+        {
+            get
+            {
+                var hoy = DateTime.Today;
+                int edad = hoy.Year - FechaNacimiento.Year;
+                if (FechaNacimiento.Date > hoy.AddYears(-edad)) edad--;
+                return edad;
+            }
+
+
+        }
+
     }
 }

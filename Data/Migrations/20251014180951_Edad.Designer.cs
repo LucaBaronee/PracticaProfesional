@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProyetoSetilPF.Data;
 
@@ -11,9 +12,11 @@ using ProyetoSetilPF.Data;
 namespace ProyetoSetilPF.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251014180951_Edad")]
+    partial class Edad
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -224,23 +227,6 @@ namespace ProyetoSetilPF.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ProyetoSetilPF.Models.Agencia", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Agencia");
-                });
-
             modelBuilder.Entity("ProyetoSetilPF.Models.Ciudad", b =>
                 {
                     b.Property<int>("Id")
@@ -410,6 +396,10 @@ namespace ProyetoSetilPF.Data.Migrations
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Agencia")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Apellido")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -550,12 +540,7 @@ namespace ProyetoSetilPF.Data.Migrations
                     b.Property<int>("PasajeroId")
                         .HasColumnType("int");
 
-                    b.Property<int>("AgenciaId")
-                        .HasColumnType("int");
-
                     b.HasKey("ViajeId", "PasajeroId");
-
-                    b.HasIndex("AgenciaId");
 
                     b.HasIndex("PasajeroId");
 
@@ -721,12 +706,6 @@ namespace ProyetoSetilPF.Data.Migrations
 
             modelBuilder.Entity("ProyetoSetilPF.Models.ViajePasajero", b =>
                 {
-                    b.HasOne("ProyetoSetilPF.Models.Agencia", "Agencia")
-                        .WithMany()
-                        .HasForeignKey("AgenciaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("ProyetoSetilPF.Models.Pasajero", "Pasajero")
                         .WithMany("ViajePasajero")
                         .HasForeignKey("PasajeroId")
@@ -738,8 +717,6 @@ namespace ProyetoSetilPF.Data.Migrations
                         .HasForeignKey("ViajeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Agencia");
 
                     b.Navigation("Pasajero");
 
