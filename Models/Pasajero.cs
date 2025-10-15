@@ -16,6 +16,7 @@ namespace ProyetoSetilPF.Models
         public DateTime Vencimiento { get; set; }
         public List<ViajePasajero>? ViajePasajero { get; set; }
         public bool Activo { get; set; } = true;
+        public bool EnViaje { get; set; } = false;
 
         [NotMapped]
         public int Edad

@@ -95,7 +95,7 @@ namespace ProyetoSetilPF.Controllers
             Paginador paginas = new Paginador
             {
                 PaginaActual = pagina,
-                RegistrosPorPagina = 5,
+                RegistrosPorPagina = 2,
                 TotalRegistros = totalRegistros
             };
 
@@ -276,7 +276,7 @@ namespace ProyetoSetilPF.Controllers
             {
                 return NotFound();
             }
-
+            ViewBag.MonedaId = new SelectList(_context.Moneda, "Id", "Nombre");
             var viaje = await _context.Viaje.FindAsync(id);
             if (viaje == null)
             {
@@ -288,7 +288,7 @@ namespace ProyetoSetilPF.Controllers
         [Authorize(Roles = "Admin,Administracion")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Descripcion,FechaIda,FechaVuelta")] Viaje viaje)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Descripcion,FechaIda,FechaVuelta,MonedaId")] Viaje viaje)
         {
             if (id != viaje.Id)
             {
@@ -326,7 +326,7 @@ namespace ProyetoSetilPF.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-
+            ViewBag.MonedaId = new SelectList(_context.Moneda, "Id", "Nombre");
             return View(viaje);
         }
 
