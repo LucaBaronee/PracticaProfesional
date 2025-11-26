@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ProyetoSetilPF.Models.Coordinador>
+﻿@* @model IEnumerable<ProyetoSetilPF.Models.Coordinador>
 
 @{
     ViewData["Title"] = "Index";
@@ -87,3 +87,118 @@
 }
     </tbody>
 </table>
+ *@
+
+
+@model ProyetoSetilPF.ViewModel.CoordinadorVM
+
+@{
+    ViewData["Title"] = "Gestión de Coordinadores";
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary mb-3 mb-md-0">
+            <i class="bi bi-people-fill me-2"></i>Coordinadores
+        </h2>
+        <div>
+            <a asp-action="Create" class="btn btn-success">
+                <i class="bi bi-plus-circle me-1"></i> Nuevo Coordinador
+            </a>
+            <a asp-action="Eliminados" class="btn btn-warning">
+                <i class="bi bi-trash3-fill me-1"></i> Coordinadores Eliminados
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            @using (Html.BeginForm("Index", "Coordinador", FormMethod.Get, new { @class = "row g-3 align-items-end" }))
+            {
+                <div class="col-md-4">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" name="busqNombre" value="@Model.busquedaNombre" class="form-control" placeholder="Nombre" />
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Apellido</label>
+                    <input type="text" name="busqApellido" value="@Model.busquedaApellido" class="form-control" placeholder="Apellido" />
+                </div>
+
+
+                <div class="col-md-12 d-flex justify-content-between align-items-center mt-3">
+                    <div class="form-check">
+                        <input type="checkbox" name="mostrarTodos" value="true" class="form-check-input" @(Model.MostrarTodos ? "checked" : "") />
+                        <label class="form-check-label">Mostrar todos</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search me-1"></i> Buscar
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Mensaje -->
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-info">@TempData["Mensaje"]</div>
+    }
+    <!-- Actualizar estados -->
+    @using (Html.BeginForm("ActualizarEstados", "Coordinador", FormMethod.Post, new { @class = "mb-3" }))
+    {
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-arrow-repeat me-1"></i> Actualizar estados Coordinador
+        </button>
+    }
+    <!-- Tabla de coordinadores -->
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Apellido</th>
+                    <th>Nombre</th>
+                    <th>Edad</th>
+                    <th>Sexo</th>
+                    <th>DNI</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.coordinador)
+                {
+                    <tr>
+                        <td>@item.Apellido</td>
+                        <td>@item.Nombre</td>
+                        <td>@item.Edad</td>
+                        <td>@item.Sexo?.Descripcion</td>
+                        <td>@item.Pasaporte</td>
+                        <td>@item.Telefono</td>
+                        <td>@item.Email</td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm me-1">
+                                Ver Detalles
+                            </a>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary btn-sm me-1">
+                                Editar
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">
+                                Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginador -->
+    <partial name="_Paginador" for="@Model.paginador" />
+</div>

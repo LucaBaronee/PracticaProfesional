@@ -113,6 +113,22 @@ namespace ProyetoSetilPF.Controllers
 
             return pasajerosParaActualizar.Count;
         }
+
+        public async Task<IActionResult> ViajesRealizados(int id)
+        {
+            var viajes = await _context.ViajePasajero
+                .Where(vp => vp.PasajeroId == id)
+                .Select(vp => vp.Viaje)
+                .ToListAsync();
+
+            ViewBag.PasajeroId = id;
+
+            return View(viajes);
+        }
+
+
+
+
         [Authorize(Roles = "Admin,Administracion")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -192,42 +208,6 @@ namespace ProyetoSetilPF.Controllers
             return View(pasajero);
         }
 
-        // POST: Pasajero/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Edit(int id, [Bind("Id,Agencia,Apellido,Nombre,Edad,SexoId,Pasaporte,FotoPasaporte,FechaNacimiento,Telefono,Vencimiento")] Pasajero pasajero)
-        //{
-        //    if (id != pasajero.Id)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    if (ModelState.IsValid)
-        //    {
-        //        try
-        //        {
-        //            pasajero.FotoPasaporte = cargarFoto(pasajero.FotoPasaporte);
-        //            _context.Update(pasajero);
-        //            await _context.SaveChangesAsync();
-        //        }
-        //        catch (DbUpdateConcurrencyException)
-        //        {
-        //            if (!PasajeroExists(pasajero.Id))
-        //            {
-        //                return NotFound();
-        //            }
-        //            else
-        //            {
-        //                throw;
-        //            }
-        //        }
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    ViewData["SexoId"] = new SelectList(_context.Sexo, "Id", "Descripcion", pasajero.SexoId);
-        //    return View(pasajero);
-        //}
         [Authorize(Roles = "Admin,Administracion")]
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -1,0 +1,216 @@
+﻿@model ProyetoSetilPF.Models.Viaje
+@{
+    ViewData["Title"] = "Detalle Completo del Viaje";
+}
+
+<div class="container py-4">
+
+    <h2 class="fw-bold mb-4 text-primary">
+        <i class="bi bi-airplane"></i> Detalle Completo – @Model.Descripcion
+    </h2>
+
+    <div class="accordion" id="viajeAccordion">
+
+        <!-- ======================= DATOS GENERALES ======================= -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingDatos">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDatos">
+                    Datos del Viaje
+                </button>
+            </h2>
+            <div id="collapseDatos" class="accordion-collapse collapse show" data-bs-parent="#viajeAccordion">
+                <div class="accordion-body row">
+                    <div class="col-md-4"><strong>Viaje:</strong> @Model.Descripcion</div>
+                    <div class="col-md-4"><strong>Fecha ida:</strong> @Model.FechaIda.ToShortDateString()</div>
+                    <div class="col-md-4"><strong>Fecha vuelta:</strong> @Model.FechaVuelta.ToShortDateString()</div>
+
+                    <div class="col-md-4 mt-2"><strong>Moneda:</strong> @Model.Moneda?.Nombre</div>
+                    <div class="col-md-4 mt-2"><strong>Balance final:</strong> @Model.Balance</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================= COORDINADORES ======================= -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingCoord">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCoord">
+                    Coordinadores
+                </button>
+            </h2>
+            <div id="collapseCoord" class="accordion-collapse collapse" data-bs-parent="#viajeAccordion">
+                <div class="accordion-body">
+                    @if (Model.ViajeCoordinador.Any())
+                    {
+                        <table class="table table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Apellido</th>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var c in Model.ViajeCoordinador)
+                                {
+                                    <tr>
+                                        <td>@c.Coordinador.Apellido</td>
+                                        <td>@c.Coordinador.Nombre</td>
+                                        <td>@c.Coordinador.Email</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No hay coordinadores asignados.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================= PASAJEROS ======================= -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingPasajeros">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePasajeros">
+                    Pasajeros
+                </button>
+            </h2>
+            <div id="collapsePasajeros" class="accordion-collapse collapse" data-bs-parent="#viajeAccordion">
+                <div class="accordion-body">
+                    @if (Model.ViajePasajero.Any())
+                    {
+                        <table class="table table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Apellido</th>
+                                    <th>Nombre</th>
+                                    <th>DNI</th>
+                                    <th>Agencia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var p in Model.ViajePasajero)
+                                {
+                                    <tr>
+                                        <td>@p.Pasajero.Apellido</td>
+                                        <td>@p.Pasajero.Nombre</td>
+                                        <td>@p.Pasajero.Pasaporte</td>
+                                        <td>@p.Agencia?.Nombre</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No hay pasajeros asignados.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================= CIUDADES ======================= -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingCiudades">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCiudades">
+                    Ciudades del Viaje
+                </button>
+            </h2>
+            <div id="collapseCiudades" class="accordion-collapse collapse" data-bs-parent="#viajeAccordion">
+                <div class="accordion-body">
+                    @if (Model.ViajeCiudad.Any())
+                    {
+                        <ul class="list-group">
+                            @foreach (var ciudad in Model.ViajeCiudad)
+                            {
+                                <li class="list-group-item">
+                                    @ciudad.Ciudad.Descripcion
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No hay ciudades cargadas.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================= MOVIMIENTOS ======================= -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingMovimientos">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMovimientos">
+                    Movimientos del Viaje
+                </button>
+            </h2>
+            <div id="collapseMovimientos" class="accordion-collapse collapse" data-bs-parent="#viajeAccordion">
+                <div class="accordion-body">
+                    @if (Model.MovimientosViaje.Any())
+                    {
+                        <table class="table table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Monto</th>
+                                    <th>Descripción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var m in Model.MovimientosViaje)
+                                {
+                                    <tr>
+                                        <td>@m.Fecha.ToShortDateString()</td>
+                                        <td>@m.TipoMovimiento.Descripcion</td>
+                                        <td>@m.Monto</td>
+                                        <td>@m.Descripcion</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No se registraron movimientos.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================= DOCUMENTOS ======================= -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingDocs">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDocs">
+                    Documentos del Viaje
+                </button>
+            </h2>
+            <div id="collapseDocs" class="accordion-collapse collapse" data-bs-parent="#viajeAccordion">
+                <div class="accordion-body">
+                    @if (Model.DocumentosViaje.Any())
+                    {
+                        <ul class="list-group">
+                            @foreach (var doc in Model.DocumentosViaje)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    @doc.NombreArchivo
+                                    <a href="@doc.RutaArchivo" target="_blank" class="btn btn-sm btn-primary">
+                                        Ver / Descargar
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No hay documentos subidos.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <a asp-action="Historial" class="btn btn-secondary mt-4">Volver al historial</a>
+</div>

@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Google;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProyetoSetilPF.Data;
 using ProyetoSetilPF.Models;
+using ProyetoSetilPF.ViewModel;
 
 namespace ProyetoSetilPF.Controllers
 {
@@ -19,11 +22,58 @@ namespace ProyetoSetilPF.Controllers
             _context = context;
         }
 
-        // GET: Coordinador
-        public async Task<IActionResult> Index()
+        [Authorize(Roles = "Admin,Administracion")]
+        public async Task<IActionResult> Index(string busqNombre, string busqApellido, string busqDni, int pagina = 1, bool mostrarTodos = false)
         {
-            var applicationDbContext = _context.Coordinador.Include(c => c.Sexo);
-            return View(await applicationDbContext.ToListAsync());
+            Paginador paginas = new Paginador();
+            paginas.PaginaActual = pagina;
+            paginas.RegistrosPorPagina = 5;
+
+            IQueryable<Coordinador> applicationDbContext = _context.Coordinador
+                 .Include(p => p.Sexo)
+                 .Where(p => p.Activo);
+
+            if (!mostrarTodos)
+            {
+                applicationDbContext = applicationDbContext.Where(p => p.EnViaje);
+            }
+
+            if (!string.IsNullOrEmpty(busqNombre))
+            {
+                applicationDbContext = applicationDbContext.Where(e => e.Nombre.Contains(busqNombre));
+                paginas.ValoresQueryString.Add("busquedaNombre", busqNombre);
+
+            }
+            if (!string.IsNullOrEmpty(busqApellido))
+            {
+                applicationDbContext = applicationDbContext.Where(e => e.Apellido.Contains(busqApellido));
+                paginas.ValoresQueryString.Add("busquedaNombre", busqApellido);
+
+            }
+            if (!string.IsNullOrEmpty(busqDni))
+            {
+                applicationDbContext = applicationDbContext.Where(e => e.Pasaporte.Equals(busqDni));
+                paginas.ValoresQueryString.Add("BusquedaDni", busqDni);
+            }
+
+
+
+            paginas.TotalRegistros = applicationDbContext.Count();
+            var mostrarRegistros = applicationDbContext
+                            .Skip((pagina - 1) * paginas.RegistrosPorPagina)
+                            .Take(paginas.RegistrosPorPagina);
+
+            CoordinadorVM datos = new CoordinadorVM()
+            {
+                busquedaNombre = busqNombre,
+                busquedaApellido = busqApellido,
+                busquedaDni = busqDni,
+                coordinador = mostrarRegistros.ToList(),
+                paginador = paginas,
+                MostrarTodos = mostrarTodos
+            };
+
+            return View(datos);
         }
 
         // GET: Coordinador/Details/5
@@ -68,6 +118,59 @@ namespace ProyetoSetilPF.Controllers
             ViewData["SexoId"] = new SelectList(_context.Sexo, "Id", "Descripcion", coordinador.SexoId);
             return View(coordinador);
         }
+
+
+
+
+        private async Task<int> ActualizarEstadoCoordinadorAsync()
+        {
+            var ahora = DateTime.Now;
+
+            // 1️⃣ Obtener IDs de pasajeros con viajes en curso o futuros
+            var coordinadorIdsConViaje = await _context.ViajeCoordinador
+                .Where(vp =>
+                    (vp.Viaje.FechaIda <= ahora && vp.Viaje.FechaVuelta >= ahora) // viaje en curso
+                    || (vp.Viaje.FechaIda > ahora)                                // viaje futuro
+                )
+                .Select(vp => vp.CoordinadorId)
+                .Distinct()
+                .ToListAsync();
+
+            // 2️⃣ Traer solo pasajeros activos cuyo estado EnViaje debe cambiar
+            var pasajerosParaActualizar = await _context.Coordinador
+                .Where(p => p.Activo && ( // solo pasajeros no eliminados
+                    (coordinadorIdsConViaje.Contains(p.Id) && !p.EnViaje) ||   // debería estar en viaje y no lo está
+                    (!coordinadorIdsConViaje.Contains(p.Id) && p.EnViaje)      // no debería estar en viaje pero lo está
+                ))
+                .ToListAsync();
+
+            // 3️⃣ Actualizar bandera EnViaje
+            foreach (var p in pasajerosParaActualizar)
+            {
+                p.EnViaje = coordinadorIdsConViaje.Contains(p.Id);
+            }
+
+            // 4️⃣ Guardar si hubo cambios
+            if (pasajerosParaActualizar.Any())
+            {
+                _context.UpdateRange(pasajerosParaActualizar);
+                await _context.SaveChangesAsync();
+            }
+
+            return pasajerosParaActualizar.Count;
+        }
+        [Authorize(Roles = "Admin,Administracion")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ActualizarEstados()
+        {
+            int actualizados = await ActualizarEstadoCoordinadorAsync();
+            TempData["Mensaje"] = $"{actualizados} pasajeros actualizados.";
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
 
         // GET: Coordinador/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -141,21 +244,75 @@ namespace ProyetoSetilPF.Controllers
             return View(coordinador);
         }
 
-        // POST: Coordinador/Delete/5
+        [Authorize(Roles = "Admin,Administracion")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var coordinador = await _context.Coordinador.FindAsync(id);
-            if (coordinador != null)
+            // 🔹 Cargar pasajero con sus viajes asociados
+            var coordinador = await _context.Coordinador
+                .Include(p => p.ViajeCoordinador)
+                .ThenInclude(vp => vp.Viaje)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (coordinador == null)
+                return NotFound();
+            var hoy = DateTime.Today;
+            // 🔹 Filtrar solo los viajes futuros (FechaIda > ahora)
+            var viajesFuturos = coordinador.ViajeCoordinador
+                .Where(vp => vp.Viaje.FechaIda >= hoy)
+                .ToList();
+
+            // 🔹 Eliminar las relaciones con viajes futuros
+            if (viajesFuturos.Any())
             {
-                _context.Coordinador.Remove(coordinador);
+                _context.ViajeCoordinador.RemoveRange(viajesFuturos);
             }
 
-            await _context.SaveChangesAsync();
+            // 🔹 Baja lógica del pasajero
+            coordinador.Activo = false;
+            coordinador.EnViaje = false;
+
+            // 🔹 Guardar cambios de manera atómica
+            try
+            {
+                _context.Update(coordinador);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Opcional: registrar el error y mostrar mensaje
+                TempData["Error"] = "Ocurrió un error al eliminar el coordinador: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+
+            TempData["Mensaje"] = $"El coordinador '{coordinador.Nombre} {coordinador.Apellido}' fue eliminado y desvinculado de {viajesFuturos.Count} viaje(s) futuro(s).";
+
             return RedirectToAction(nameof(Index));
         }
+        public async Task<IActionResult> Eliminados()
+        {
+            var coordinadorEliminados = await _context.Coordinador
+                .Include(p => p.Sexo)
+                .Where(p => !p.Activo) // solo los eliminados
+                .OrderBy(p => p.Apellido)
+                .ToListAsync();
 
+            return View(coordinadorEliminados);
+        }
+        public async Task<IActionResult> Reactivar(int id)
+        {
+            var coordinador = await _context.Coordinador.FindAsync(id);
+            if (coordinador == null)
+                return NotFound();
+
+            coordinador.Activo = true;
+            _context.Update(coordinador);
+            await _context.SaveChangesAsync();
+
+            TempData["Mensaje"] = $"El pasajero '{coordinador.Nombre} {coordinador.Apellido}' fue reactivado.";
+            return RedirectToAction(nameof(Eliminados));
+        }
         private bool CoordinadorExists(int id)
         {
             return _context.Coordinador.Any(e => e.Id == id);

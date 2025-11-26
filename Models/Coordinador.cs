@@ -18,7 +18,7 @@ namespace ProyetoSetilPF.Models
         public int Telefono { get; set; }
         public List<ViajeCoordinador>? ViajeCoordinador { get; set; }
         public bool Activo { get; set; } = true;
-
+        public bool EnViaje { get; set; } = false;
         public string Email { get; set; }
 
         // 🔑 Relación con IdentityUser

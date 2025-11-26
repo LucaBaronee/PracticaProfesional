@@ -1,0 +1,45 @@
+﻿<ProyetoSetilPF.Models.Coordinador>
+    @{
+        ViewData["Title"] = "Coordinadores Eliminados";
+    }
+
+    <h1>Coordinadores Eliminados</h1>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success">@TempData["Mensaje"]</div>
+    }
+
+    <p>
+        <a asp-action="Index" class="btn btn-primary">Volver a pasajeros activos</a>
+    </p>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Apellido</th>
+                <th>Nombre</th>
+                <th>Pasaporte</th>
+                <th>Sexo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Apellido</td>
+                    <td>@item.Nombre</td>
+                    <td>@item.Pasaporte</td>
+                    <td>@item.Sexo.Descripcion</td>
+                    <td>
+                        <form asp-action="Reactivar" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button type="submit" class="btn btn-success btn-sm">Reactivar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>

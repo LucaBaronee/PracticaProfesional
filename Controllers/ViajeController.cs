@@ -174,11 +174,29 @@ namespace ProyetoSetilPF.Controllers
             return View("Historial", datos);
         }
 
+        [Authorize(Roles = "Admin,Administracion")]
+        public async Task<IActionResult> DetallesCompleto(int id)
+        {
+            var viaje = await _context.Viaje
+                .Include(v => v.ViajeCiudad)
+                    .ThenInclude(vc => vc.Ciudad)
+                .Include(v => v.ViajeCoordinador)
+                    .ThenInclude(vc => vc.Coordinador)
+                .Include(v => v.ViajePasajero)
+                    .ThenInclude(vp => vp.Pasajero)
+                .Include(v => v.ViajePasajero)
+                    .ThenInclude(vp => vp.Agencia)
+                .Include(v => v.MovimientosViaje)
+                    .ThenInclude(m => m.TipoMovimiento)
+                .Include(v => v.DocumentosViaje)
+                .Include(v=> v.Moneda)
+                .FirstOrDefaultAsync(v => v.Id == id);
 
+            if (viaje == null)
+                return NotFound();
 
-
-
-
+            return View(viaje);
+        }
 
 
 
@@ -195,6 +213,8 @@ namespace ProyetoSetilPF.Controllers
 
             return View(viaje);
         }
+
+
         [Authorize(Roles = "Admin,Administracion")]
         // GET: Viaje/Create
         public IActionResult Create()
