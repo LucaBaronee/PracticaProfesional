@@ -8,5 +8,7 @@
         public Viaje? Viaje { get; set; }
         public int AgenciaId { get; set; }          // 👈 Agencia para este viaje
         public Agencia Agencia { get; set; }
+        public int PuntoSubidaId { get; set; }
+        public PuntoSubida PuntoSubida { get; set; }
     }
 }

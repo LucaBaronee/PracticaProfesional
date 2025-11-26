@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProyetoSetilPF.Data;
 
@@ -11,9 +12,11 @@ using ProyetoSetilPF.Data;
 namespace ProyetoSetilPF.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251126192303_SegundaPrueba")]
+    partial class SegundaPrueba
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -587,6 +590,9 @@ namespace ProyetoSetilPF.Data.Migrations
                     b.Property<int>("AgenciaId")
                         .HasColumnType("int");
 
+                    b.Property<int>("PuntoSubida")
+                        .HasColumnType("int");
+
                     b.Property<int>("PuntoSubidaId")
                         .HasColumnType("int");
 
@@ -595,8 +601,6 @@ namespace ProyetoSetilPF.Data.Migrations
                     b.HasIndex("AgenciaId");
 
                     b.HasIndex("PasajeroId");
-
-                    b.HasIndex("PuntoSubidaId");
 
                     b.ToTable("ViajePasajero");
                 });
@@ -772,12 +776,6 @@ namespace ProyetoSetilPF.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ProyetoSetilPF.Models.PuntoSubida", "PuntoSubida")
-                        .WithMany()
-                        .HasForeignKey("PuntoSubidaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("ProyetoSetilPF.Models.Viaje", "Viaje")
                         .WithMany("ViajePasajero")
                         .HasForeignKey("ViajeId")
@@ -787,8 +785,6 @@ namespace ProyetoSetilPF.Data.Migrations
                     b.Navigation("Agencia");
 
                     b.Navigation("Pasajero");
-
-                    b.Navigation("PuntoSubida");
 
                     b.Navigation("Viaje");
                 });

@@ -10,6 +10,7 @@
             <th>Apellido</th>
             <th>Pasaporte</th>
             <th>Agencia</th>
+            <th>Sube en:</th>
             <th>Acciones</th>
         </tr>
     </thead>
@@ -21,6 +22,7 @@
                 <td>@vp.Pasajero.Apellido</td>
                 <td>@vp.Pasajero.Pasaporte</td>
                 <td>@vp.Agencia?.Nombre</td> <!-- Agencia asignada -->
+                <td>@vp.PuntoSubida?.Descripcion</td>
                 <td>
                     <a asp-controller="Pasajero" asp-action="Details" asp-route-id="@vp.Pasajero.Id" class="btn btn-sm btn-info">
                         <i class="bi bi-eye-fill me-1"></i> Ver

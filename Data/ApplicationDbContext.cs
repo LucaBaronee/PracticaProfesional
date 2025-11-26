@@ -77,6 +77,7 @@ namespace ProyetoSetilPF.Data
         public DbSet<Moneda> Moneda { get; set; }
         public DbSet<DocumentoViaje> DocumentosViaje { get; set; }
         public DbSet<Agencia> Agencia { get; set; }
+        public DbSet<PuntoSubida> puntoSubida { get; set; }
         public DbSet<Ciudad> Ciudad { get; set; }
         public DbSet<Pasajero> Pasajero { get; set; }
         public DbSet<Coordinador> Coordinador { get; set; }

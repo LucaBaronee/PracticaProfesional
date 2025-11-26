@@ -402,7 +402,9 @@ namespace ProyetoSetilPF.Controllers
                 .Include(v => v.ViajePasajero)
                     .ThenInclude(vp => vp.Pasajero)
                 .Include(v => v.ViajePasajero)
-                    .ThenInclude(vp => vp.Agencia) // 🔹 incluir agencia
+                    .ThenInclude(vp => vp.Agencia)
+                    .Include(v=>v.ViajePasajero)
+                    .ThenInclude(v=>v.PuntoSubida)// 🔹 incluir agencia
                 .FirstOrDefaultAsync(v => v.Id == id);
 
             if (viaje == null) return NotFound();
@@ -705,6 +707,12 @@ namespace ProyetoSetilPF.Controllers
                     Value = a.Id.ToString(),
                     Text = a.Nombre
                 }).ToList();
+            ViewBag.PuntoSubida = _context.puntoSubida
+                .Select(a => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Value = a.Id.ToString(),
+                    Text = a.Descripcion
+                }).ToList();
 
             ViewBag.ViajeId = viajeId;
             ViewBag.Busqueda = busqueda;
@@ -712,9 +720,41 @@ namespace ProyetoSetilPF.Controllers
             return View(pasajeros);
         }
 
+        //[Authorize(Roles = "Admin,Administracion")]
+        //[HttpPost]
+        //public async Task<IActionResult> AgregarPasajero(int viajeId, int pasajeroId, int agenciaId, int puntoSubida)
+        //{
+        //    // Validar que no exista ya
+        //    var existe = await _context.ViajePasajero
+        //        .AnyAsync(vp => vp.ViajeId == viajeId && vp.PasajeroId == pasajeroId);
+
+        //    if (!existe)
+        //    {
+        //        // Validar que exista la agencia
+        //        var agencia = await _context.Agencia.FindAsync(agenciaId);
+        //        var puntosubida = await _context.puntoSubida.FindAsync(puntoSubida);
+        //        if (agencia == null)
+        //        {
+        //            ModelState.AddModelError("", "La agencia seleccionada no existe.");
+        //            return RedirectToAction("AgregarPasajero", new { viajeId });
+        //        }
+
+        //        _context.ViajePasajero.Add(new ViajePasajero
+        //        {
+        //            ViajeId = viajeId,
+        //            PasajeroId = pasajeroId,
+        //            AgenciaId = agenciaId,
+        //            PuntoSubidaId = puntoSubida
+        //        });
+        //        await _context.SaveChangesAsync();
+        //    }
+
+        //    return RedirectToAction("VerPasajeros", new { id = viajeId });
+        //}
+
         [Authorize(Roles = "Admin,Administracion")]
         [HttpPost]
-        public async Task<IActionResult> AgregarPasajero(int viajeId, int pasajeroId, int agenciaId)
+        public async Task<IActionResult> AgregarPasajero(int viajeId, int pasajeroId, int agenciaId, int puntoSubida)
         {
             // Validar que no exista ya
             var existe = await _context.ViajePasajero
@@ -722,7 +762,7 @@ namespace ProyetoSetilPF.Controllers
 
             if (!existe)
             {
-                // Validar que exista la agencia
+                // Validar agencia
                 var agencia = await _context.Agencia.FindAsync(agenciaId);
                 if (agencia == null)
                 {
@@ -730,19 +770,27 @@ namespace ProyetoSetilPF.Controllers
                     return RedirectToAction("AgregarPasajero", new { viajeId });
                 }
 
+                // Validar punto de subida
+                var punto = await _context.puntoSubida.FindAsync(puntoSubida);
+                if (punto == null)
+                {
+                    ModelState.AddModelError("", "El punto de subida seleccionado no existe.");
+                    return RedirectToAction("AgregarPasajero", new { viajeId });
+                }
+
                 _context.ViajePasajero.Add(new ViajePasajero
                 {
                     ViajeId = viajeId,
                     PasajeroId = pasajeroId,
-                    AgenciaId = agenciaId
+                    AgenciaId = agenciaId,
+                    PuntoSubidaId = puntoSubida
                 });
+
                 await _context.SaveChangesAsync();
             }
 
             return RedirectToAction("VerPasajeros", new { id = viajeId });
         }
-
-
 
 
 
