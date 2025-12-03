@@ -34,7 +34,7 @@ namespace ProyetoSetilPF.Controllers
                 .Include(p => p.Sexo)
                 .Where(p=> p.Activo);
 
-            if (!mostrarTodos)
+            if (mostrarTodos)
             {
                 applicationDbContext = applicationDbContext.Where(p => p.EnViaje);
             }

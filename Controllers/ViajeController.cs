@@ -448,6 +448,7 @@ namespace ProyetoSetilPF.Controllers
         {
             if (ModelState.IsValid)
             {
+                movimiento.Fecha = DateTime.Today;
                 // Traigo el viaje correspondiente
                 var viaje = _context.Viaje.FirstOrDefault(v => v.Id == movimiento.ViajeId);
 
@@ -632,125 +633,79 @@ namespace ProyetoSetilPF.Controllers
             return RedirectToAction("VerCoordinador", new { id = viajeId });
         }
 
-        // GET: Viaje/AgregarPasajero
-        //[Authorize(Roles = "Admin,Administracion")]
-        //public async Task<IActionResult> AgregarPasajero(int viajeId, string busqueda = "")
-        //{
-        //    var viaje = await _context.Viaje.FindAsync(viajeId);
-        //    if (viaje == null) return NotFound();
+      
 
-        //    // Pasajeros ya asignados
-        //    var pasajerosAsignadosIds = _context.ViajePasajero
-        //        .Where(vp => vp.ViajeId == viajeId)
-        //        .Select(vp => vp.PasajeroId)
-        //        .ToList();
-
-        //    // Filtrar pasajeros disponibles por búsqueda
-        //    var pasajeros = _context.Pasajero
-        //        .Where(p => !pasajerosAsignadosIds.Contains(p.Id) &&
-        //                    (p.Nombre.Contains(busqueda) ||
-        //                     p.Apellido.Contains(busqueda) ||
-        //                     p.Pasaporte.Contains(busqueda)))
-        //        .ToList();
-
-        //    ViewBag.ViajeId = viajeId;
-        //    ViewBag.Busqueda = busqueda;
-
-        //    return View(pasajeros);
-        //}
-
-        //// POST: Viaje/AgregarPasajero
-        //[Authorize(Roles = "Admin,Administracion")]
-        //[HttpPost]
-        //public async Task<IActionResult> AgregarPasajero(int viajeId, int pasajeroId)
-        //{
-        //    var existe = await _context.ViajePasajero
-        //        .AnyAsync(vp => vp.ViajeId == viajeId && vp.PasajeroId == pasajeroId);
-
-        //    if (!existe)
-        //    {
-        //        _context.ViajePasajero.Add(new ViajePasajero
-        //        {
-        //            ViajeId = viajeId,
-        //            PasajeroId = pasajeroId
-        //        });
-        //        await _context.SaveChangesAsync();
-        //    }
-
-        //    return RedirectToAction("VerPasajeros", new { id = viajeId });
-        //}
-
-        [Authorize(Roles = "Admin,Administracion")]
-        public async Task<IActionResult> AgregarPasajero(int viajeId, string busqueda = "")
+     
+        public async Task<IActionResult> AgregarPasajero(
+    int viajeId,
+    string busqueda = "",
+    int pagina = 1,
+    int registrosPorPagina = 10)
         {
             var viaje = await _context.Viaje.FindAsync(viajeId);
             if (viaje == null) return NotFound();
 
-            // Pasajeros ya asignados
+            // IDs ya asignados
             var pasajerosAsignadosIds = _context.ViajePasajero
                 .Where(vp => vp.ViajeId == viajeId)
                 .Select(vp => vp.PasajeroId)
                 .ToList();
 
-            // Filtrar pasajeros disponibles por búsqueda
-            var pasajeros = _context.Pasajero
-                .Where(p => !pasajerosAsignadosIds.Contains(p.Id) &&
-                            (p.Nombre.Contains(busqueda) ||
-                             p.Apellido.Contains(busqueda) ||
-                             p.Pasaporte.Contains(busqueda)))
+            // Base query
+            var query = _context.Pasajero
+                .Where(p => !pasajerosAsignadosIds.Contains(p.Id));
+
+            // Filtro
+            if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                query = query.Where(p =>
+                    p.Nombre.Contains(busqueda) ||
+                    p.Apellido.Contains(busqueda) ||
+                    p.Pasaporte.Contains(busqueda));
+            }
+
+            int totalRegistros = await query.CountAsync();
+
+            var pasajeros = await query
+                .OrderBy(p => p.Apellido)
+                .Skip((pagina - 1) * registrosPorPagina)
+                .Take(registrosPorPagina)
+                .ToListAsync();
+
+            // Armar view model
+            var vm = new PasajeroVm
+            {
+                pasajero = pasajeros,
+                busquedaNombre = busqueda,
+                paginador = new Paginador
+                {
+                    PaginaActual = pagina,
+                    TotalRegistros = totalRegistros,
+                    RegistrosPorPagina = registrosPorPagina,
+                    ValoresQueryString = new Dictionary<string, string>
+            {
+                {"viajeId", viajeId.ToString()},
+                {"busqueda", busqueda }
+            }
+                }
+            };
+
+            // Viewbags
+            ViewBag.Agencias = _context.Agencia
+                .Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Nombre })
                 .ToList();
 
-            // Agencias para el dropdown
-            ViewBag.Agencias = _context.Agencia
-                .Select(a => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
-                {
-                    Value = a.Id.ToString(),
-                    Text = a.Nombre
-                }).ToList();
             ViewBag.PuntoSubida = _context.puntoSubida
-                .Select(a => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
-                {
-                    Value = a.Id.ToString(),
-                    Text = a.Descripcion
-                }).ToList();
+                .Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Descripcion })
+                .ToList();
 
             ViewBag.ViajeId = viajeId;
-            ViewBag.Busqueda = busqueda;
 
-            return View(pasajeros);
+            return View(vm);
         }
 
-        //[Authorize(Roles = "Admin,Administracion")]
-        //[HttpPost]
-        //public async Task<IActionResult> AgregarPasajero(int viajeId, int pasajeroId, int agenciaId, int puntoSubida)
-        //{
-        //    // Validar que no exista ya
-        //    var existe = await _context.ViajePasajero
-        //        .AnyAsync(vp => vp.ViajeId == viajeId && vp.PasajeroId == pasajeroId);
 
-        //    if (!existe)
-        //    {
-        //        // Validar que exista la agencia
-        //        var agencia = await _context.Agencia.FindAsync(agenciaId);
-        //        var puntosubida = await _context.puntoSubida.FindAsync(puntoSubida);
-        //        if (agencia == null)
-        //        {
-        //            ModelState.AddModelError("", "La agencia seleccionada no existe.");
-        //            return RedirectToAction("AgregarPasajero", new { viajeId });
-        //        }
 
-        //        _context.ViajePasajero.Add(new ViajePasajero
-        //        {
-        //            ViajeId = viajeId,
-        //            PasajeroId = pasajeroId,
-        //            AgenciaId = agenciaId,
-        //            PuntoSubidaId = puntoSubida
-        //        });
-        //        await _context.SaveChangesAsync();
-        //    }
-
-        //    return RedirectToAction("VerPasajeros", new { id = viajeId });
-        //}
 
         [Authorize(Roles = "Admin,Administracion")]
         [HttpPost]
@@ -792,31 +747,112 @@ namespace ProyetoSetilPF.Controllers
             return RedirectToAction("VerPasajeros", new { id = viajeId });
         }
 
+        //[Authorize(Roles = "Admin,Administracion")]
+        //public async Task<IActionResult> AgregarCoordinador(int viajeId, string busqueda = "")
+        //{
+        //    var viaje = await _context.Viaje.FindAsync(viajeId);
+        //    if (viaje == null) return NotFound();
+
+        //    // Coordinadores ya asignados
+        //    var asignadosIds = _context.ViajeCoordinador
+        //        .Where(vc => vc.ViajeId == viajeId)
+        //        .Select(vc => vc.CoordinadorId)
+        //        .ToList();
+
+        //    // Coordinadores disponibles para agregar
+        //    var disponibles = await _context.Coordinador
+        //        .Where(c => !asignadosIds.Contains(c.Id) &&
+        //                   (c.Nombre.Contains(busqueda) || c.Apellido.Contains(busqueda) || c.Pasaporte.Contains(busqueda)))
+        //        .ToListAsync();
+
+        //    ViewBag.ViajeId = viajeId;
+        //    ViewBag.Busqueda = busqueda;
+
+        //    return View(disponibles); // Retorna la vista AgregarCoordinador.cshtml
+        //}
 
 
         [Authorize(Roles = "Admin,Administracion")]
-        public async Task<IActionResult> AgregarCoordinador(int viajeId, string busqueda = "")
+        public async Task<IActionResult> AgregarCoordinador(
+    int viajeId,
+    string busquedaNombre = "",
+    string busquedaApellido = "",
+    string busquedaDni = "",
+    int pagina = 1,
+    int registrosPorPagina = 10,
+    bool mostrarTodos = false)
         {
             var viaje = await _context.Viaje.FindAsync(viajeId);
             if (viaje == null) return NotFound();
 
-            // Coordinadores ya asignados
-            var asignadosIds = _context.ViajeCoordinador
+            // IDs ya asignados
+            var coordinadoresAsignadosIds = _context.ViajeCoordinador
                 .Where(vc => vc.ViajeId == viajeId)
                 .Select(vc => vc.CoordinadorId)
                 .ToList();
 
-            // Coordinadores disponibles para agregar
-            var disponibles = await _context.Coordinador
-                .Where(c => !asignadosIds.Contains(c.Id) &&
-                           (c.Nombre.Contains(busqueda) || c.Apellido.Contains(busqueda) || c.Pasaporte.Contains(busqueda)))
-                .ToListAsync();
+            // Base query
+            var query = _context.Coordinador
+                .Where(c => !coordinadoresAsignadosIds.Contains(c.Id));
+
+            // Filtro de búsqueda
+            if (!string.IsNullOrWhiteSpace(busquedaNombre))
+                query = query.Where(c => c.Nombre.Contains(busquedaNombre));
+
+            if (!string.IsNullOrWhiteSpace(busquedaApellido))
+                query = query.Where(c => c.Apellido.Contains(busquedaApellido));
+
+            if (!string.IsNullOrWhiteSpace(busquedaDni))
+                query = query.Where(c => c.Pasaporte.Contains(busquedaDni));
+
+            int totalRegistros = await query.CountAsync();
+
+            // Paginación solo si no se muestra todo
+            List<Coordinador> coordinadores;
+            if (mostrarTodos)
+            {
+                coordinadores = await query.OrderBy(c => c.Apellido).ToListAsync();
+            }
+            else
+            {
+                coordinadores = await query
+                    .OrderBy(c => c.Apellido)
+                    .Skip((pagina - 1) * registrosPorPagina)
+                    .Take(registrosPorPagina)
+                    .ToListAsync();
+            }
+
+            // Armar ViewModel
+            var vm = new CoordinadorVM
+            {
+                coordinador = coordinadores,
+                busquedaNombre = busquedaNombre,
+                busquedaApellido = busquedaApellido,
+                busquedaDni = busquedaDni,
+                MostrarTodos = mostrarTodos,
+                paginador = new Paginador
+                {
+                    PaginaActual = pagina,
+                    TotalRegistros = totalRegistros,
+                    RegistrosPorPagina = registrosPorPagina,
+                    ValoresQueryString = new Dictionary<string, string>
+            {
+                {"viajeId", viajeId.ToString()},
+                {"busquedaNombre", busquedaNombre},
+                {"busquedaApellido", busquedaApellido},
+                {"busquedaDni", busquedaDni},
+                {"mostrarTodos", mostrarTodos.ToString()}
+            }
+                }
+            };
 
             ViewBag.ViajeId = viajeId;
-            ViewBag.Busqueda = busqueda;
 
-            return View(disponibles); // Retorna la vista AgregarCoordinador.cshtml
+            return View(vm);
         }
+
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

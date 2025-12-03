@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using ProyetoSetilPF.Data;
+using ProyetoSetilPF.Services;
+using ProyetoSetilPF.Validators;
 
 namespace ProyetoSetilPF
 {
@@ -21,12 +24,17 @@ namespace ProyetoSetilPF
 
             // Identity con roles
             builder.Services.AddDefaultIdentity<IdentityUser>(options =>
-                    options.SignIn.RequireConfirmedAccount = false)
+                    options.SignIn.RequireConfirmedAccount = true)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             builder.Services.AddControllersWithViews();
 
+           
+
+            //builder.Services.AddTransient<IEmailSender, EmailSender>();
+
+            //builder.Services.AddScoped<IUserValidator<IdentityUser>, CustomUserValidator>();
             var app = builder.Build();
 
             // Middleware

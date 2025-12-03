@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
 using ProyetoSetilPF.Data;
 using ProyetoSetilPF.Models;
 
@@ -13,11 +14,78 @@ namespace ProyetoSetilPF.Controllers
     public class CiudadController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment env;
 
-        public CiudadController(ApplicationDbContext context)
+        public CiudadController(ApplicationDbContext context, IWebHostEnvironment env)
         {
             _context = context;
+            this.env = env;
         }
+
+
+
+
+
+        public async Task<IActionResult> ImportarGenero(IFormFile archivo)
+        {
+            if (archivo == null || archivo.Length == 0)
+            {
+                TempData["Mensaje"] = "Error: No se ha proporcionado un archivo de Excel.";
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                using (var package = new ExcelPackage(archivo.OpenReadStream()))
+                {
+                    var worksheet = package.Workbook.Worksheets[0];
+
+                    var ciudades = new List<Ciudad>();
+
+                    // Saltar encabezado
+                    int startRow = worksheet.Dimension.Start.Row + 1;
+                    int endRow = worksheet.Dimension.End.Row;
+
+                    for (int row = startRow; row <= endRow; row++)
+                    {
+                        string descripcion = worksheet.Cells[row, 1].Text;
+                        string codigoPostalTexto = worksheet.Cells[row, 2].Text;
+
+                        if (string.IsNullOrWhiteSpace(descripcion))
+                            continue;
+
+                        int codigoPostal = 0;
+
+                        // Intentar convertir el código postal a número
+                        int.TryParse(codigoPostalTexto, out codigoPostal);
+
+                        var ciudad = new Ciudad
+                        {
+                            Descripcion = descripcion,
+                            CodigoPostal = codigoPostal
+                        };
+
+                        ciudades.Add(ciudad);
+                    }
+
+                    _context.Ciudad.AddRange(ciudades);
+                    await _context.SaveChangesAsync();
+                }
+
+                TempData["Mensaje"] = "Ciudades importadas exitosamente.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Mensaje"] = "Error durante la importación. Verifica el archivo.";
+                Console.WriteLine(ex);
+            }
+
+            return RedirectToAction("Index");
+        }
+
+
+
+
 
         // GET: Ciuda
         public async Task<IActionResult> Index()

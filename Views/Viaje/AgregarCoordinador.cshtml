@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ProyetoSetilPF.Models.Coordinador>
+﻿@model ProyetoSetilPF.ViewModel.CoordinadorVM
 
 @{
     ViewData["Title"] = "Agregar Coordinador al Viaje";
@@ -24,7 +24,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var coord in Model)
+        @foreach (var coord in Model.coordinador)
         {
             <tr>
                 <td>@coord.Nombre</td>
@@ -43,6 +43,9 @@
         }
     </tbody>
 </table>
+<div class="mt-4">
+    <partial name="_Paginador" for="@Model.paginador" />
+</div>
 
 <a asp-action="VerCoordinador" asp-route-id="@ViewBag.ViajeId" class="btn btn-secondary mt-3">
     <i class="bi bi-arrow-left-circle me-1"></i> Volver a Coordinadores

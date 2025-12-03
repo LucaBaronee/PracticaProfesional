@@ -1,8 +1,108 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inicio";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container py-5">
+
+    <!-- Título principal -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">
+            <i class="bi bi-airplane-engines-fill me-2"></i>Gestión de Viajes
+        </h1>
+        <p class="lead text-secondary">
+            Sistema para administrar pasajeros, viajes y destinos de forma simple y eficiente.
+        </p>
+    </div>
+
+
+    <!-- Viajes (visible para todos los usuarios) -->
+    
+    <!-- Cards principales -->
+    <div class="row g-4">
+
+
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 border-0 hover-shadow">
+                <div class="card-body text-center">
+                    <i class="bi bi-globe-americas text-success fs-1 mb-3"></i>
+                    <h4 class="fw-bold mb-2">Viajes</h4>
+                    <p class="text-muted">Organiza los viajes, rutas y ciudades de destino.</p>
+                    <a asp-controller="Viaje" asp-action="Index" class="btn btn-success mt-2">Gestionar</a>
+                </div>
+            </div>
+        </div>
+        @if (User.IsInRole("Admin") || User.IsInRole("Administracion"))
+        {
+            <!-- Pasajeros -->
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100 border-0 hover-shadow">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people-fill text-primary fs-1 mb-3"></i>
+                        <h4 class="fw-bold mb-2">Pasajeros</h4>
+                        <p class="text-muted">Consulta, agrega y administra los pasajeros registrados.</p>
+                        <a asp-controller="Pasajero" asp-action="Index" class="btn btn-primary mt-2">Gestionar</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coordinadores -->
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100 border-0 hover-shadow">
+                    <div class="card-body text-center">
+                        <i class="bi bi-person-badge-fill text-warning fs-1 mb-3"></i>
+                        <h4 class="fw-bold mb-2">Coordinadores</h4>
+                        <p class="text-muted">Controla el equipo encargado de los viajes.</p>
+                        <a asp-controller="Coordinador" asp-action="Index" class="btn btn-warning mt-2 text-white">Gestionar</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Punto de Subida -->
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100 border-0 hover-shadow">
+                    <div class="card-body text-center">
+                        <i class="bi bi-signpost-split-fill text-info fs-1 mb-3"></i>
+                        <h4 class="fw-bold mb-2">Puntos de Subida</h4>
+                        <p class="text-muted">Administra los puntos de subida de los pasajeros.</p>
+                        <a asp-controller="PuntoSubida" asp-action="Index" class="btn btn-info mt-2 text-white">Gestionar</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agencia -->
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100 border-0 hover-shadow">
+                    <div class="card-body text-center">
+                        <i class="bi bi-building text-secondary fs-1 mb-3"></i>
+                        <h4 class="fw-bold mb-2">Agencias</h4>
+                        <p class="text-muted">Administra las agencias relacionadas con los viajes.</p>
+                        <a asp-controller="Agencia" asp-action="Index" class="btn btn-secondary mt-2 text-white">Gestionar</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ciudad -->
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100 border-0 hover-shadow">
+                    <div class="card-body text-center">
+                        <i class="bi bi-geo-alt-fill text-danger fs-1 mb-3"></i>
+                        <h4 class="fw-bold mb-2">Ciudades</h4>
+                        <p class="text-muted">Administra las ciudades de destino de los viajes.</p>
+                        <a asp-controller="Ciudad" asp-action="Index" class="btn btn-danger mt-2 text-white">Gestionar</a>
+                    </div>
+                </div>
+            </div>
+        }
+
+        
+    </div>
 </div>
+
+<style>
+    .hover-shadow:hover {
+        transform: translateY(-4px);
+        transition: 0.2s ease;
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
+    }
+</style>

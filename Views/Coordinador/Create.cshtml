@@ -1,4 +1,4 @@
-﻿@model ProyetoSetilPF.Models.Coordinador
+﻿@* @model ProyetoSetilPF.Models.Coordinador
 
 @{
     ViewData["Title"] = "Create";
@@ -69,4 +69,96 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+ *@
+
+                @model ProyetoSetilPF.Models.Coordinador
+
+@{
+    ViewData["Title"] = "Crear Coordinador";
+}
+
+<div class="container py-4">
+    <h2 class="fw-bold text-primary mb-4">
+        <i class="bi bi-plus-circle me-2"></i>Crear Coordinador
+    </h2>
+
+    <div class="card shadow-sm rounded-4 p-4">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row g-3">
+                <!-- Columna izquierda: Datos generales -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="Apellido" class="form-label"></label>
+                        <input asp-for="Apellido" class="form-control" />
+                        <span asp-validation-for="Apellido" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Nombre" class="form-label"></label>
+                        <input asp-for="Nombre" class="form-control" />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="SexoId" class="form-label"></label>
+                        <select asp-for="SexoId" class="form-select" asp-items="ViewBag.SexoId"></select>
+                        <span asp-validation-for="SexoId" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Pasaporte" class="form-label"></label>
+                        <input asp-for="Pasaporte" class="form-control" />
+                        <span asp-validation-for="Pasaporte" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Vencimiento" class="form-label"></label>
+                        <input asp-for="Vencimiento" type="date" class="form-control" />
+                        <span asp-validation-for="Vencimiento" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="FechaNacimiento" class="form-label"></label>
+                        <input asp-for="FechaNacimiento" type="date" class="form-control" />
+                        <span asp-validation-for="FechaNacimiento" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Telefono" class="form-label"></label>
+                        <input asp-for="Telefono" class="form-control" />
+                        <span asp-validation-for="Telefono" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" type="email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Columna derecha: Foto Pasaporte -->
+                <div class="col-md-6 text-center">
+                    <label class="form-label d-block mb-2 fw-bold">Foto Pasaporte</label>
+
+                    <div class="text-muted fw-bold mb-3">Sube la foto del pasaporte</div>
+
+                    <input type="file" id="foto" name="foto" accept="image/jpeg" class="form-control mb-2" />
+
+                    <span asp-validation-for="FotoPasaporte" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mt-4 text-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle me-1"></i> Crear
+                </button>
+                <a asp-action="Index" class="btn btn-secondary ms-2">
+                    <i class="bi bi-arrow-left-circle me-1"></i> Volver
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

@@ -17,30 +17,51 @@
     <tbody>
         @foreach (var vp in Model)
         {
+            var collapseId = "collapseSubida" + vp.Pasajero.Id;
             <tr>
                 <td>@vp.Pasajero.Nombre</td>
                 <td>@vp.Pasajero.Apellido</td>
                 <td>@vp.Pasajero.Pasaporte</td>
-                <td>@vp.Agencia?.Nombre</td> <!-- Agencia asignada -->
-                <td>@vp.PuntoSubida?.Descripcion</td>
+                <td>@vp.Agencia?.Nombre</td>
+                <td>
+                    @if (vp.PuntoSubida != null)
+                    {
+                        <a class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" href="#@collapseId" role="button" aria-expanded="false" aria-controls="@collapseId">
+                            @vp.PuntoSubida.Descripcion
+                        </a>
+                        <div class="collapse mt-2" id="@collapseId">
+                            <div class="card card-body p-2">
+                                <strong>Ciudad:</strong> @vp.PuntoSubida.Ciudad <br />
+                                <strong>Calle:</strong> @vp.PuntoSubida.Calle <br />
+                                <strong>Número:</strong> @vp.PuntoSubida.CalleNumero
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="text-muted">No asignado</span>
+                    }
+                </td>
                 <td>
                     <a asp-controller="Pasajero" asp-action="Details" asp-route-id="@vp.Pasajero.Id" class="btn btn-sm btn-info">
                         <i class="bi bi-eye-fill me-1"></i> Ver
                     </a>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Administracion")){
                     <form asp-action="EliminarPasajeroDelViaje" method="post" onsubmit="return confirm('¿Seguro que deseas quitar este pasajero del viaje?');" class="d-inline">
                         <input type="hidden" name="viajeId" value="@ViewBag.ViajeId" />
                         <input type="hidden" name="pasajeroId" value="@vp.Pasajero.Id" />
                         <button type="submit" class="btn btn-sm btn-danger">
-                              <i class="bi bi-person-dash-fill me-1"></i> Quitar
+                            <i class="bi bi-person-dash-fill me-1"></i> Quitar
                         </button>
                     </form>
+                    }
                 </td>
             </tr>
         }
     </tbody>
 </table>
 
-<!-- Botón para ir a la vista de agregar pasajero (solo para Admin/Administración) -->
+<!-- Botón para agregar pasajero -->
 @if (User.IsInRole("Admin") || User.IsInRole("Administracion"))
 {
     <a asp-action="AgregarPasajero" asp-route-viajeId="@ViewBag.ViajeId" class="btn btn-success rounded-pill px-4 py-2 mt-3">
@@ -51,3 +72,5 @@
 <a asp-action="Index" class="btn btn-secondary rounded-pill px-3 py-2 mt-3">
     <i class="bi bi-arrow-left-circle me-1"></i> Volver a Viajes
 </a>
+
+

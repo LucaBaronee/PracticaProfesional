@@ -16,10 +16,12 @@ namespace ProyetoSetilPF.Controllers
     public class CoordinadorController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private IWebHostEnvironment _env;
 
-        public CoordinadorController(ApplicationDbContext context)
+        public CoordinadorController(ApplicationDbContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         [Authorize(Roles = "Admin,Administracion")]
@@ -33,7 +35,7 @@ namespace ProyetoSetilPF.Controllers
                  .Include(p => p.Sexo)
                  .Where(p => p.Activo);
 
-            if (!mostrarTodos)
+            if (mostrarTodos)
             {
                 applicationDbContext = applicationDbContext.Where(p => p.EnViaje);
             }
@@ -111,6 +113,7 @@ namespace ProyetoSetilPF.Controllers
         {
             if (ModelState.IsValid)
             {
+                coordinador.FotoPasaporte = cargarFoto("");
                 _context.Add(coordinador);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -192,6 +195,49 @@ namespace ProyetoSetilPF.Controllers
         // POST: Coordinador/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Edit(int id, [Bind("Id,Apellido,Nombre,Edad,SexoId,Pasaporte,FotoPasaporte,Vencimiento,FechaNacimiento,Telefono,Email")] Coordinador coordinador)
+        //{
+        //    if (id != coordinador.Id)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        try
+        //        {
+        //            // Mantener la foto anterior si no se subió ninguna
+        //            var nuevaFoto = HttpContext.Request.Form.Files.FirstOrDefault();
+        //            if (nuevaFoto != null && nuevaFoto.Length > 0)
+        //            {
+        //                coordinador.FotoPasaporte = cargarFoto(coordinador.FotoPasaporte);
+        //            }
+        //            else
+        //            {
+        //                coordinador.FotoPasaporte = coordinador.FotoPasaporte;
+        //            }
+        //            _context.Update(coordinador);
+        //            await _context.SaveChangesAsync();
+        //        }
+        //        catch (DbUpdateConcurrencyException)
+        //        {
+        //            if (!CoordinadorExists(coordinador.Id))
+        //            {
+        //                return NotFound();
+        //            }
+        //            else
+        //            {
+        //                throw;
+        //            }
+        //        }
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    ViewData["SexoId"] = new SelectList(_context.Sexo, "Id", "Descripcion", coordinador.SexoId);
+        //    return View(coordinador);
+        //}
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Apellido,Nombre,Edad,SexoId,Pasaporte,FotoPasaporte,Vencimiento,FechaNacimiento,Telefono,Email")] Coordinador coordinador)
@@ -205,6 +251,25 @@ namespace ProyetoSetilPF.Controllers
             {
                 try
                 {
+                    // Obtener la entidad original de la base para mantener propiedades que no se editan
+                    var coordinadorDb = await _context.Coordinador.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+                    if (coordinadorDb == null) return NotFound();
+
+                    // Mantener la foto anterior si no se subió ninguna nueva
+                    var nuevaFoto = HttpContext.Request.Form.Files.FirstOrDefault();
+                    if (nuevaFoto != null && nuevaFoto.Length > 0)
+                    {
+                        coordinador.FotoPasaporte = cargarFoto(coordinadorDb.FotoPasaporte);
+                    }
+                    else
+                    {
+                        coordinador.FotoPasaporte = coordinadorDb.FotoPasaporte;
+                    }
+
+                    // Mantener las banderas o propiedades que no se modifican desde el formulario
+                    coordinador.Activo = coordinadorDb.Activo;
+                    coordinador.EnViaje = coordinadorDb.EnViaje; // si aplica
+
                     _context.Update(coordinador);
                     await _context.SaveChangesAsync();
                 }
@@ -221,9 +286,12 @@ namespace ProyetoSetilPF.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["SexoId"] = new SelectList(_context.Sexo, "Id", "Descripcion", coordinador.SexoId);
             return View(coordinador);
         }
+
+
 
         // GET: Coordinador/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -317,5 +385,50 @@ namespace ProyetoSetilPF.Controllers
         {
             return _context.Coordinador.Any(e => e.Id == id);
         }
+
+
+
+        [Authorize(Roles = "Admin,Administracion")]
+        private string cargarFoto(string fotoAnterior)
+        {
+            var archivos = HttpContext.Request.Form.Files;
+            if (archivos != null && archivos.Count > 0)
+            {
+                var archivoFoto = archivos[0];
+                if (archivoFoto.Length > 0)
+                {
+                    var pathDestino = Path.Combine(_env.WebRootPath, "fotos");
+
+                    // Si no existe la carpeta, la crea
+                    if (!Directory.Exists(pathDestino))
+                        Directory.CreateDirectory(pathDestino);
+
+                    // Si había una foto anterior, la borro
+                    if (!string.IsNullOrEmpty(fotoAnterior))
+                    {
+                        var rutaFotoAnterior = Path.Combine(pathDestino, fotoAnterior);
+                        if (System.IO.File.Exists(rutaFotoAnterior))
+                            System.IO.File.Delete(rutaFotoAnterior);
+                    }
+
+                    // Genero nuevo nombre único para la foto
+                    var archivoDestino = Guid.NewGuid().ToString("N")
+                                         + Path.GetExtension(archivoFoto.FileName);
+
+                    // Guardo la nueva foto
+                    using (var filestream = new FileStream(Path.Combine(pathDestino, archivoDestino), FileMode.Create))
+                    {
+                        archivoFoto.CopyTo(filestream);
+                    }
+
+                    return archivoDestino;
+                }
+            }
+            return "";
+        }
+
+
+
+
     }
 }

@@ -1,4 +1,4 @@
-﻿@model ProyetoSetilPF.ViewModel.ViajeVM
+﻿@* @model ProyetoSetilPF.ViewModel.ViajeVM
 
 @{
     ViewData["Title"] = "Gestión de Viajes";
@@ -11,9 +11,15 @@
             <i class="bi bi-globe-americas me-2"></i>@ViewData["Title"]
         </h2>
         <div class="d-flex flex-wrap gap-2">
-            <a asp-action="Create" class="btn btn-success shadow-sm rounded-pill px-4">
-                <i class="bi bi-plus-circle me-1"></i> Nuevo Viaje
-            </a>
+
+
+            @if (User.IsInRole("Admin") || User.IsInRole("Administracion")) 
+            {
+                <a asp-action="Create" class="btn btn-success shadow-sm rounded-pill px-4">
+                    <i class="bi bi-plus-circle me-1"></i> Nuevo Viaje
+                </a>
+            }
+
             <a asp-action="Historial" class="btn btn-secondary shadow-sm rounded-pill px-4">
                 <i class="bi bi-clock-history me-1"></i> Ver Historial de Viajes
             </a>
@@ -93,34 +99,41 @@
                                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info text-white rounded-pill">
                                             <i class="bi bi-eye-fill me-1"></i> Ver Detalles
                                         </a>
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning text-dark rounded-pill">
-                                            <i class="bi bi-pencil-square me-1"></i> Editar
-                                        </a>
-                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger rounded-pill">
-                                            <i class="bi bi-trash-fill me-1"></i> Eliminar
-                                        </a>
+                                        @if (User.IsInRole("Admin") || User.IsInRole("Administracion")) 
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning text-dark rounded-pill">
+                                                <i class="bi bi-pencil-square me-1"></i> Editar
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger rounded-pill">
+                                                <i class="bi bi-trash-fill me-1"></i> Eliminar
+                                            </a>
+                                        }
+
+
                                     </div>
 
                                     <div class="d-grid gap-2 mt-2">
                                         <a asp-controller="Viaje" asp-action="HacerMovimiento" asp-route-viajeId="@item.Id"
-                                           class="btn btn-sm btn-outline-success rounded-pill">
+                                        class="btn btn-sm btn-outline-success rounded-pill">
                                             <i class="bi bi-wallet2 me-1"></i> Agregar Movimiento
                                         </a>
 
                                         <a asp-controller="Viaje" asp-action="VerMovimientos" asp-route-viajeId="@item.Id"
-                                           class="btn btn-sm btn-outline-secondary rounded-pill">
+                                        class="btn btn-sm btn-outline-secondary rounded-pill">
                                             <i class="bi bi-list-ul me-1"></i> Ver Movimientos
                                         </a>
-
-                                        <form asp-controller="Viaje" asp-action="SubirPdf" method="post" enctype="multipart/form-data"
-                                              class="border rounded p-2 bg-light">
-                                            <input type="hidden" name="viajeId" value="@item.Id" />
-                                            <input type="file" name="archivo" accept="application/pdf"
-                                                   class="form-control form-control-sm mb-2" />
-                                            <button type="submit" class="btn btn-sm btn-success w-100 rounded-pill">
-                                                <i class="bi bi-upload me-1"></i> Subir PDF
-                                            </button>
-                                        </form>
+                                        @if (User.IsInRole("Admin") || User.IsInRole("Administracion")) {
+                                            <form asp-controller="Viaje" asp-action="SubirPdf" method="post" enctype="multipart/form-data"
+                                                  class="border rounded p-2 bg-light">
+                                                <input type="hidden" name="viajeId" value="@item.Id" />
+                                                <input type="file" name="archivo" accept="application/pdf"
+                                                       class="form-control form-control-sm mb-2" />
+                                                <button type="submit" class="btn btn-sm btn-success w-100 rounded-pill">
+                                                    <i class="bi bi-upload me-1"></i> Subir PDF
+                                                </button>
+                                            </form>
+                                        }
+                                        
 
                                         <a asp-controller="Viaje" asp-action="DocumentoVista" asp-route-viajeId="@item.Id"
                                            class="btn btn-sm btn-dark rounded-pill">
@@ -140,4 +153,234 @@
     <div class="mt-4">
         <partial name="_Paginador" for="@Model.paginador" />
     </div>
+</div>
+ *@
+
+
+
+@model ProyetoSetilPF.ViewModel.ViajeVM
+
+@{
+    ViewData["Title"] = "Gestión de Viajes";
+}
+
+<div class="container py-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary mb-3 mb-md-0">
+            <i class="bi bi-globe-americas me-2"></i>@ViewData["Title"]
+        </h2>
+
+        <div class="d-flex flex-wrap gap-2">
+            @if (User.IsInRole("Admin") || User.IsInRole("Administracion"))
+            {
+                <a asp-action="Create" class="btn btn-success shadow-sm rounded-pill px-4">
+                    <i class="bi bi-plus-circle me-1"></i> Nuevo Viaje
+                </a>
+            }
+
+            <a asp-action="Historial" class="btn btn-secondary shadow-sm rounded-pill px-4">
+                <i class="bi bi-clock-history me-1"></i> Ver Historial de Viajes
+            </a>
+        </div>
+    </div>
+
+    <!-- Buscador + Orden -->
+    <div class="d-flex flex-wrap justify-content-between mb-3 gap-2">
+        <form method="get" asp-action="Index" class="d-flex gap-2">
+            <input type="text" name="busquedaNombre" value="@Model.busquedaNombre" class="form-control" placeholder="Buscar por nombre" />
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i> Buscar
+            </button>
+        </form>
+
+        <form method="get" asp-action="Index">
+            <input type="hidden" name="busquedaNombre" value="@Model.busquedaNombre" />
+            <input type="hidden" name="ordenDesc" value="@(Model.ordenDesc ? "false" : "true")" />
+            <button type="submit" class="btn btn-outline-secondary">
+                <i class="bi bi-sort-numeric-down-alt me-1"></i>
+                Ordenar por fecha @(Model.ordenDesc ? "(↑)" : "(↓)")
+            </button>
+        </form>
+    </div>
+
+
+    <!-- ====================== -->
+    <!--   TABLA (solo PC)      -->
+    <!-- ====================== -->
+    <div class="d-none d-md-block">
+        <div class="card shadow-lg border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-primary text-center text-nowrap">
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Fecha Ida</th>
+                                <th>Fecha Vuelta</th>
+                                <th>Balance</th>
+                                <th>Moneda</th>
+                                <th>Ciudades</th>
+                                <th>Pasajeros</th>
+                                <th>Coordinadores</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.viaje)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@item.Descripcion</td>
+                                    <td>@item.FechaIda.ToString("dd/MM/yyyy")</td>
+                                    <td>@item.FechaVuelta.ToString("dd/MM/yyyy")</td>
+                                    <td class="fw-bold text-success">
+                                        @($"{item.Moneda?.Simbolo}{item.Balance:N2}")
+                                    </td>
+                                    <td class="fw-semibold">@($"{item.Moneda?.Simbolo} {item.Moneda.CodigoIso}")</td>
+
+                                    <td class="text-center">
+                                        <a asp-action="VerCiudad" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary rounded-pill">
+                                            <i class="bi bi-geo-alt-fill me-1"></i> Ver
+                                        </a>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <a asp-action="VerPasajeros" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary rounded-pill">
+                                            <i class="bi bi-people-fill me-1"></i> Ver
+                                        </a>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <a asp-action="VerCoordinador" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary rounded-pill">
+                                            <i class="bi bi-person-badge-fill me-1"></i> Ver
+                                        </a>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <div class="d-flex flex-wrap justify-content-center gap-2 mb-2">
+                                           
+
+                                            @if (User.IsInRole("Admin") || User.IsInRole("Administracion"))
+                                            {
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning text-dark rounded-pill">
+                                                    <i class="bi bi-pencil-square me-1"></i> Editar
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger rounded-pill">
+                                                    <i class="bi bi-trash-fill me-1"></i> Eliminar
+                                                </a>
+                                            }
+                                        </div>
+
+                                        <div class="d-grid gap-2 mt-2">
+                                            <a asp-action="HacerMovimiento" asp-route-viajeId="@item.Id" class="btn btn-sm btn-outline-success rounded-pill">
+                                                <i class="bi bi-wallet2 me-1"></i> Agregar Movimiento
+                                            </a>
+
+                                            <a asp-action="VerMovimientos" asp-route-viajeId="@item.Id" class="btn btn-sm btn-outline-secondary rounded-pill">
+                                                <i class="bi bi-list-ul me-1"></i> Ver Movimientos
+                                            </a>
+
+                                            @if (User.IsInRole("Admin") || User.IsInRole("Administracion"))
+                                            {
+                                                <form asp-action="SubirPdf" method="post" enctype="multipart/form-data" class="border rounded p-2 bg-light">
+                                                    <input type="hidden" name="viajeId" value="@item.Id" />
+                                                    <input type="file" name="archivo" accept="application/pdf" class="form-control form-control-sm mb-2" />
+                                                    <button type="submit" class="btn btn-sm btn-success w-100 rounded-pill">
+                                                        <i class="bi bi-upload me-1"></i> Subir PDF
+                                                    </button>
+                                                </form>
+                                            }
+
+                                            <a asp-action="DocumentoVista" asp-route-viajeId="@item.Id" class="btn btn-sm btn-dark rounded-pill">
+                                                <i class="bi bi-file-earmark-text me-1"></i> Ver Archivos
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ====================== -->
+    <!--   TARJETAS (Mobile)    -->
+    <!-- ====================== -->
+    <div class="d-block d-md-none">
+        @foreach (var item in Model.viaje)
+        {
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+
+                    <h5 class="fw-bold text-primary">@item.Descripcion</h5>
+
+                    <p class="mb-1"><strong>Ida:</strong> @item.FechaIda.ToString("dd/MM/yyyy")</p>
+                    <p class="mb-1"><strong>Vuelta:</strong> @item.FechaVuelta.ToString("dd/MM/yyyy")</p>
+                    <p class="mb-1">
+                        <strong>Balance:</strong> @($"{item.Moneda?.Simbolo}{item.Balance:N2}")
+                    </p>
+                    <p class="mb-1">
+                        <strong>Moneda:</strong> @($"{item.Moneda?.Simbolo} {item.Moneda.CodigoIso}")
+                    </p>
+
+                    <div class="d-grid gap-2 mt-3">
+                        <a asp-action="VerCiudad" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm">
+                            Ciudades
+                        </a>
+
+                        <a asp-action="VerPasajeros" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm">
+                            Pasajeros
+                        </a>
+
+                        <a asp-action="VerCoordinador" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm">
+                            Coordinadores
+                        </a>
+                        <a asp-action="HacerMovimiento" asp-route-viajeId="@item.Id" class="btn btn-sm btn-outline-success rounded-pill">
+                            <i class="bi bi-wallet2 me-1"></i> Agregar Movimiento
+                        </a>
+                        <a asp-action="VerMovimientos" asp-route-viajeId="@item.Id" class="btn btn-outline-secondary btn-sm">
+                            Movimientos
+                        </a>
+
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm text-white">
+                            Ver Detalles
+                        </a>
+
+                        @if (User.IsInRole("Admin") || User.IsInRole("Administracion"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm text-dark">
+                                Editar
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">
+                                Eliminar
+                            </a>
+
+                            <form asp-action="SubirPdf" method="post" enctype="multipart/form-data" class="p-2 border rounded bg-light">
+                                <input type="hidden" name="viajeId" value="@item.Id" />
+                                <input type="file" name="archivo" accept="application/pdf" class="form-control form-control-sm mb-2" />
+                                <button type="submit" class="btn btn-success w-100 btn-sm">
+                                    Subir PDF
+                                </button>
+                            </form>
+                        }
+
+                        <a asp-action="DocumentoVista" asp-route-viajeId="@item.Id" class="btn btn-dark btn-sm">
+                            Ver Archivos
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Paginador -->
+    <div class="mt-4">
+        <partial name="_Paginador" for="@Model.paginador" />
+    </div>
+
 </div>
