@@ -7,7 +7,7 @@
         public string Ciudad { get; set; }
         public string Calle { get; set; }
         public int CalleNumero { get; set; }
-
+        public bool Activo { get; set; } = true;
 
     }
 }

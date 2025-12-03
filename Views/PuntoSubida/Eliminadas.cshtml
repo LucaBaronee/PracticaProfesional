@@ -1,0 +1,37 @@
+﻿@model IEnumerable<ProyetoSetilPF.Models.PuntoSubida>
+
+<h2>Puntos de Subida Eliminados</h2>
+
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success">@TempData["Mensaje"]</div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Descripción</th>
+            <th>Ciudad</th>
+            <th>Calle</th>
+            <th>Número</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var punto in Model)
+        {
+            <tr>
+                <td>@punto.Descripcion</td>
+                <td>@punto.Ciudad</td>
+                <td>@punto.Calle</td>
+                <td>@punto.CalleNumero</td>
+                <td>
+                    <form asp-action="Reactivar" method="post">
+                        <input type="hidden" name="id" value="@punto.Id" />
+                        <button type="submit" class="btn btn-success btn-sm">Reactivar</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

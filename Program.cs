@@ -30,11 +30,11 @@ namespace ProyetoSetilPF
 
             builder.Services.AddControllersWithViews();
 
-           
+
 
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-            //builder.Services.AddScoped<IUserValidator<IdentityUser>, CustomUserValidator>();
+            builder.Services.AddScoped<IUserValidator<IdentityUser>, CustomUserValidator>();
             var app = builder.Build();
 
             // Middleware

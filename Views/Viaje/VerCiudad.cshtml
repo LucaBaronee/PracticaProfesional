@@ -24,6 +24,13 @@
     </tbody>
 </table>
 
+@if (User.IsInRole("Admin") || User.IsInRole("Administracion"))
+{
+    <a asp-action="AgregarCiudad" asp-route-viajeId="@ViewBag.ViajeId" class="btn btn-success rounded-pill px-4 py-2 mt-3">
+        <i class="bi bi-plus-circle me-2"></i> Agregar Ciudad
+    </a>
+}
+
 <a asp-action="Index" class="btn btn-secondary rounded-pill px-3 py-2 mt-3">
     <i class="bi bi-arrow-left-circle me-1"></i> Volver a Viajes
 </a>

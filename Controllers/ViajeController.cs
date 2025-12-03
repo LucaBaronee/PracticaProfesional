@@ -605,6 +605,10 @@ namespace ProyetoSetilPF.Controllers
             if (viaje == null) return NotFound();
 
             var ciudades = viaje.ViajeCiudad.Select(vc => vc.Ciudad).ToList();
+
+            // 🔹 Importante: pasar el viajeId al ViewBag
+            ViewBag.ViajeId = viaje.Id;
+
             return View(ciudades);
         }
         [Authorize(Roles = "Admin,Administracion")]
@@ -633,9 +637,77 @@ namespace ProyetoSetilPF.Controllers
             return RedirectToAction("VerCoordinador", new { id = viajeId });
         }
 
-      
 
-     
+
+
+        //    public async Task<IActionResult> AgregarPasajero(
+        //int viajeId,
+        //string busqueda = "",
+        //int pagina = 1,
+        //int registrosPorPagina = 10)
+        //    {
+        //        var viaje = await _context.Viaje.FindAsync(viajeId);
+        //        if (viaje == null) return NotFound();
+
+        //        // IDs ya asignados
+        //        var pasajerosAsignadosIds = _context.ViajePasajero
+        //    .Where(vp => vp.ViajeId == viajeId && vp.Pasajero.Activo)
+        //    .Select(vp => vp.PasajeroId)
+        //    .ToList();
+        //        // Base query
+        //        var query = _context.Pasajero
+        //            .Where(p => !pasajerosAsignadosIds.Contains(p.Id));
+
+        //        // Filtro
+        //        if (!string.IsNullOrWhiteSpace(busqueda))
+        //        {
+        //            query = query.Where(p =>
+        //                p.Nombre.Contains(busqueda) ||
+        //                p.Apellido.Contains(busqueda) ||
+        //                p.Pasaporte.Contains(busqueda));
+        //        }
+
+        //        int totalRegistros = await query.CountAsync();
+
+        //        var pasajeros = await query
+        //            .OrderBy(p => p.Apellido)
+        //            .Skip((pagina - 1) * registrosPorPagina)
+        //            .Take(registrosPorPagina)
+        //            .ToListAsync();
+
+        //        // Armar view model
+        //        var vm = new PasajeroVm
+        //        {
+        //            pasajero = pasajeros,
+        //            busquedaNombre = busqueda,
+        //            paginador = new Paginador
+        //            {
+        //                PaginaActual = pagina,
+        //                TotalRegistros = totalRegistros,
+        //                RegistrosPorPagina = registrosPorPagina,
+        //                ValoresQueryString = new Dictionary<string, string>
+        //        {
+        //            {"viajeId", viajeId.ToString()},
+        //            {"busqueda", busqueda }
+        //        }
+        //            }
+        //        };
+
+        //        // Viewbags
+        //        ViewBag.Agencias = _context.Agencia
+        //            .Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Nombre })
+        //            .ToList();
+
+        //        ViewBag.PuntoSubida = _context.puntoSubida
+        //            .Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Descripcion })
+        //            .ToList();
+
+        //        ViewBag.ViajeId = viajeId;
+
+        //        return View(vm);
+        //    }
+
+
         public async Task<IActionResult> AgregarPasajero(
     int viajeId,
     string busqueda = "",
@@ -645,17 +717,17 @@ namespace ProyetoSetilPF.Controllers
             var viaje = await _context.Viaje.FindAsync(viajeId);
             if (viaje == null) return NotFound();
 
-            // IDs ya asignados
+            // IDs ya asignados de pasajeros activos
             var pasajerosAsignadosIds = _context.ViajePasajero
-                .Where(vp => vp.ViajeId == viajeId)
+                .Where(vp => vp.ViajeId == viajeId && vp.Pasajero.Activo)
                 .Select(vp => vp.PasajeroId)
                 .ToList();
 
-            // Base query
+            // Base query: solo pasajeros activos
             var query = _context.Pasajero
-                .Where(p => !pasajerosAsignadosIds.Contains(p.Id));
+                .Where(p => p.Activo && !pasajerosAsignadosIds.Contains(p.Id));
 
-            // Filtro
+            // Filtro por búsqueda
             if (!string.IsNullOrWhiteSpace(busqueda))
             {
                 query = query.Where(p =>
@@ -692,10 +764,12 @@ namespace ProyetoSetilPF.Controllers
 
             // Viewbags
             ViewBag.Agencias = _context.Agencia
+                .Where(a => a.Activo) // solo agencias activas
                 .Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Nombre })
                 .ToList();
 
             ViewBag.PuntoSubida = _context.puntoSubida
+                .Where(a => a.Activo)   
                 .Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Descripcion })
                 .ToList();
 
@@ -703,7 +777,6 @@ namespace ProyetoSetilPF.Controllers
 
             return View(vm);
         }
-
 
 
 
@@ -884,6 +957,85 @@ namespace ProyetoSetilPF.Controllers
             }
 
             return RedirectToAction("VerCoordinador", new { id = viajeId });
+        }
+
+
+        // GET: Mostrar listado de ciudades disponibles
+        [HttpGet]
+        [Authorize(Roles = "Admin,Administracion")]
+        public async Task<IActionResult> AgregarCiudad(
+            int viajeId,
+            string busqueda = "",
+            int pagina = 1,
+            int registrosPorPagina = 10,
+            bool mostrarTodos = false)
+        {
+            var viaje = await _context.Viaje.FindAsync(viajeId);
+            if (viaje == null) return NotFound();
+
+            var ciudadesAsignadasIds = _context.ViajeCiudad
+                .Where(vc => vc.ViajeId == viajeId)
+                .Select(vc => vc.CiudadId)
+                .ToList();
+
+            var query = _context.Ciudad
+                .Where(c => c.Activo && !ciudadesAsignadasIds.Contains(c.Id));
+
+            if (!string.IsNullOrWhiteSpace(busqueda))
+                query = query.Where(c => c.Descripcion.Contains(busqueda));
+
+            int totalRegistros = await query.CountAsync();
+
+            List<Ciudad> ciudades = mostrarTodos
+                ? await query.OrderBy(c => c.Descripcion).ToListAsync()
+                : await query.OrderBy(c => c.Descripcion)
+                             .Skip((pagina - 1) * registrosPorPagina)
+                             .Take(registrosPorPagina)
+                             .ToListAsync();
+
+            var vm = new CiudadVM
+            {
+                ciudad = ciudades,
+                busqNombre = busqueda,
+                paginador = new Paginador
+                {
+                    PaginaActual = pagina,
+                    TotalRegistros = totalRegistros,
+                    RegistrosPorPagina = registrosPorPagina,
+                    ValoresQueryString = new Dictionary<string, string>
+            {
+                { "viajeId", viajeId.ToString() },
+                { "busqueda", busqueda },
+                { "mostrarTodos", mostrarTodos.ToString() }
+            }
+                }
+            };
+
+            ViewBag.ViajeId = viajeId;
+            return View("AgregarCiudad", vm); // nombre de la vista explícito
+        }
+
+
+        // POST: Agregar una ciudad al viaje
+        [HttpPost]
+        [Authorize(Roles = "Admin,Administracion")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AgregarCiudad(int viajeId, int ciudadId)
+        {
+            var existe = await _context.ViajeCiudad
+                .AnyAsync(vc => vc.ViajeId == viajeId && vc.CiudadId == ciudadId);
+
+            if (!existe)
+            {
+                _context.ViajeCiudad.Add(new ViajeCiudad
+                {
+                    ViajeId = viajeId,
+                    CiudadId = ciudadId
+                });
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("VerCiudad", new { id = viajeId });
         }
 
 

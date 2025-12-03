@@ -1,30 +1,38 @@
 ﻿@model ProyetoSetilPF.Models.Ciudad
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalles de Ciudad";
 }
 
-<h1>Details</h1>
+<div class="container py-4">
+    <!-- Header con botones -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary">
+            <i class="bi bi-building me-2"></i>@Model.Descripcion
+        </h2>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary me-2">
+                <i class="bi bi-pencil-square me-1"></i> Editar
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left-circle me-1"></i> Volver
+            </a>
+        </div>
+    </div>
 
-<div>
-    <h4>Ciudad</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Descripcion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Descripcion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CodigoPostal)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CodigoPostal)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <!-- Tarjeta con detalles -->
+    <div class="card shadow-sm rounded-4 p-4">
+        <h4 class="fw-bold text-secondary mb-3">
+            <i class="bi bi-info-circle me-2"></i>Información de la Ciudad
+        </h4>
+        <hr />
+        <div class="row mb-2">
+            <div class="col-sm-4 fw-bold">Descripción:</div>
+            <div class="col-sm-8">@Model.Descripcion</div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-sm-4 fw-bold">Código Postal:</div>
+            <div class="col-sm-8">@Model.CodigoPostal</div>
+        </div>
+    </div>
 </div>

@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProyetoSetilPF.Data;
 using ProyetoSetilPF.Models;
+using ProyetoSetilPF.ViewModel;
 
 namespace ProyetoSetilPF.Controllers
 {
@@ -20,9 +22,33 @@ namespace ProyetoSetilPF.Controllers
         }
 
         // GET: PuntoSubida
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pagina = 1)
         {
-            return View(await _context.puntoSubida.ToListAsync());
+
+            Paginador paginas = new Paginador();
+            paginas.PaginaActual = pagina;
+            paginas.RegistrosPorPagina = 5;
+
+            IQueryable<PuntoSubida> applicationDbContext = _context.puntoSubida
+                .Where(p => p.Activo);
+
+
+            paginas.TotalRegistros = applicationDbContext.Count();
+            var mostrarRegistros = applicationDbContext
+                            .Skip((pagina - 1) * paginas.RegistrosPorPagina)
+                            .Take(paginas.RegistrosPorPagina);
+
+
+            PuntoSubidaVM datos = new PuntoSubidaVM()
+            {
+              
+                puntosubida = mostrarRegistros.ToList(),
+                paginador = paginas,
+            };
+
+            return View(datos);
+
+
         }
 
         // GET: PuntoSubida/Details/5
@@ -117,6 +143,7 @@ namespace ProyetoSetilPF.Controllers
         }
 
         // GET: PuntoSubida/Delete/5
+        // GET: PuntoSubida/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -126,6 +153,7 @@ namespace ProyetoSetilPF.Controllers
 
             var puntoSubida = await _context.puntoSubida
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (puntoSubida == null)
             {
                 return NotFound();
@@ -140,14 +168,50 @@ namespace ProyetoSetilPF.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var puntoSubida = await _context.puntoSubida.FindAsync(id);
+
             if (puntoSubida != null)
             {
-                _context.puntoSubida.Remove(puntoSubida);
+                // No borramos nada, solo desactivamos
+                puntoSubida.Activo = false;
+                _context.Update(puntoSubida);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+
+        // GET: Mostrar Puntos de Subida Eliminados
+        [Authorize(Roles = "Admin,Administracion")]
+        public async Task<IActionResult> Eliminadas()
+        {
+            var puntosEliminados = await _context.puntoSubida
+                .Where(p => !p.Activo) // solo los desactivados
+                .OrderBy(p => p.Descripcion)
+                .ToListAsync();
+
+            return View(puntosEliminados);
+        }
+
+        // POST: Reactivar Punto de Subida
+        [Authorize(Roles = "Admin,Administracion")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Reactivar(int id)
+        {
+            var punto = await _context.puntoSubida.FindAsync(id);
+            if (punto == null)
+                return NotFound();
+
+            punto.Activo = true;
+            _context.Update(punto);
+            await _context.SaveChangesAsync();
+
+            TempData["Mensaje"] = $"El punto de subida '{punto.Descripcion}' fue reactivado.";
+            return RedirectToAction(nameof(Eliminadas));
+        }
+
+
 
         private bool PuntoSubidaExists(int id)
         {

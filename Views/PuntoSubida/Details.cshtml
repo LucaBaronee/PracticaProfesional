@@ -1,42 +1,36 @@
 ﻿@model ProyetoSetilPF.Models.PuntoSubida
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalle del Punto de Subida";
 }
 
-<h1>Details</h1>
+<div class="container py-4">
+    <h2 class="fw-bold text-primary mb-4">
+        <i class="bi bi-info-circle me-2"></i>Detalle del Punto de Subida
+    </h2>
 
-<div>
-    <h4>PuntoSubida</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Descripcion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Descripcion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Ciudad)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Ciudad)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Calle)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Calle)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CalleNumero)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CalleNumero)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <div class="card shadow rounded-3 p-4">
+        <dl class="row mb-4">
+            <dt class="col-sm-3">Descripción</dt>
+            <dd class="col-sm-9">@Model.Descripcion</dd>
+
+            <dt class="col-sm-3">Ciudad</dt>
+            <dd class="col-sm-9">@Model.Ciudad</dd>
+
+            <dt class="col-sm-3">Calle</dt>
+            <dd class="col-sm-9">@Model.Calle</dd>
+
+            <dt class="col-sm-3">Número</dt>
+            <dd class="col-sm-9">@Model.CalleNumero</dd>
+        </dl>
+
+        <div class="mt-3 text-end">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                <i class="bi bi-pencil-square me-1"></i> Editar
+            </a>
+            <a asp-action="Index" class="btn btn-secondary ms-2">
+                <i class="bi bi-arrow-left-circle me-1"></i> Volver
+            </a>
+        </div>
+    </div>
 </div>

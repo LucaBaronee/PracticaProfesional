@@ -6,10 +6,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
+using System.IO.Compression;
+using Microsoft.AspNetCore.Hosting;
 using ProyetoSetilPF.Data;
 using ProyetoSetilPF.Models;
 using ProyetoSetilPF.ViewModel;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Globalization;
+using System.Text;
 
 namespace ProyetoSetilPF.Controllers
 {
@@ -391,5 +396,286 @@ namespace ProyetoSetilPF.Controllers
             }
             return "";
         }
+
+
+
+
+        public IActionResult Importar()
+        {
+            return View();
+        }
+
+
+        //[HttpPost]
+        //public async Task<IActionResult> ImportarPasajeros(IFormFile archivoExcel, IFormFile archivoZip)
+        //{
+        //    if (archivoExcel == null || archivoExcel.Length == 0)
+        //    {
+        //        TempData["Error"] = "Debe seleccionar un archivo Excel.";
+        //        return RedirectToAction("Index");
+        //    }
+
+        //    if (archivoZip == null || archivoZip.Length == 0)
+        //    {
+        //        TempData["Error"] = "Debe seleccionar un archivo ZIP con las fotos.";
+        //        return RedirectToAction("Index");
+        //    }
+
+        //    // Ruta fotos
+        //    string rutaFotos = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "fotos");
+        //    if (!Directory.Exists(rutaFotos))
+        //        Directory.CreateDirectory(rutaFotos);
+
+        //    // Leer ZIP y guardar archivos en memoria
+        //    Dictionary<string, byte[]> fotosZip = new();
+        //    using (var zipStream = archivoZip.OpenReadStream())
+        //    using (var zip = new System.IO.Compression.ZipArchive(zipStream))
+        //    {
+        //        foreach (var entry in zip.Entries)
+        //        {
+        //            // Solo archivos reales (ignora carpetas)
+        //            if (!string.IsNullOrEmpty(entry.Name) && entry.Length > 0)
+        //            {
+        //                using var streamEntry = entry.Open();
+        //                using var ms = new MemoryStream();
+        //                streamEntry.CopyTo(ms);
+
+        //                fotosZip[entry.Name.ToLower()] = ms.ToArray();
+        //            }
+        //        }
+        //    }
+
+        //    // Función para normalizar nombres (quitar espacios, guiones, etc.)
+        //    string Normalizar(string texto) => new string(texto.Where(char.IsLetterOrDigit).ToArray()).ToLower();
+
+        //    // Leer Excel
+        //    using var stream = new MemoryStream();
+        //    await archivoExcel.CopyToAsync(stream);
+        //    using var package = new OfficeOpenXml.ExcelPackage(stream);
+
+        //    var hoja = package.Workbook.Worksheets[0];
+        //    int filas = hoja.Dimension.Rows;
+
+        //    for (int i = 2; i <= filas; i++)
+        //    {
+        //        string apellido = hoja.Cells[i, 1].Text.Trim();
+        //        string nombre = hoja.Cells[i, 2].Text.Trim();
+        //        string sexoTexto = hoja.Cells[i, 3].Text.Trim().ToLower();
+        //        string pasaporte = hoja.Cells[i, 4].Text.Trim();
+        //        string fechaNacimientoTxt = hoja.Cells[i, 5].Text.Trim();
+        //        string telefono = hoja.Cells[i, 6].Text.Trim();
+        //        string vencimientoTxt = hoja.Cells[i, 7].Text.Trim();
+
+        //        if (_context.Pasajero.Any(p => p.Pasaporte == pasaporte))
+        //            continue;
+
+        //        // Sexo
+        //        var sexo = _context.Sexo.FirstOrDefault(s => s.Descripcion.ToLower() == sexoTexto);
+        //        if (sexo == null)
+        //        {
+        //            sexo = new Sexo { Descripcion = char.ToUpper(sexoTexto[0]) + sexoTexto.Substring(1) };
+        //            _context.Sexo.Add(sexo);
+        //            await _context.SaveChangesAsync();
+        //        }
+
+        //        var pasajero = new Pasajero
+        //        {
+        //            Apellido = apellido,
+        //            Nombre = nombre,
+        //            SexoId = sexo.Id,
+        //            Pasaporte = pasaporte,
+        //            Telefono = telefono,
+        //            FechaNacimiento = DateTime.Parse(fechaNacimientoTxt),
+        //            Vencimiento = DateTime.Parse(vencimientoTxt),
+        //        };
+
+        //        // Foto: buscar por nombre normalizado
+        //        string nombreEsperado = Normalizar($"{nombre}{apellido}{pasaporte}");
+        //        var foto = fotosZip.FirstOrDefault(f => Normalizar(f.Key).Contains(nombreEsperado));
+
+        //        if (foto.Value != null)
+        //        {
+        //            string extension = System.IO.Path.GetExtension(foto.Key);
+        //            string nombreFinal = $"{nombre}_{apellido}_{pasaporte}{extension}".ToLower();
+
+        //            string rutaFinal = Path.Combine(rutaFotos, nombreFinal);
+        //            System.IO.File.WriteAllBytes(rutaFinal, foto.Value);
+
+        //            pasajero.FotoPasaporte = nombreFinal;
+        //        }
+
+        //        _context.Pasajero.Add(pasajero);
+        //        await _context.SaveChangesAsync();
+        //    }
+
+        //    TempData["Mensaje"] = "Importación completada con éxito.";
+        //    return RedirectToAction("Index");
+        //}
+
+
+        [HttpPost]
+        public async Task<IActionResult> ImportarPasajeros(IFormFile archivoExcel, IFormFile archivoZip)
+        {
+            if (archivoExcel == null || archivoExcel.Length == 0)
+            {
+                TempData["Error"] = "Debe seleccionar un archivo Excel.";
+                return RedirectToAction("Index");
+            }
+
+            if (archivoZip == null || archivoZip.Length == 0)
+            {
+                TempData["Error"] = "Debe seleccionar un archivo ZIP con las fotos.";
+                return RedirectToAction("Index");
+            }
+
+            // Ruta fotos
+            string rutaFotos = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "fotos");
+            if (!Directory.Exists(rutaFotos))
+                Directory.CreateDirectory(rutaFotos);
+
+            // Leer ZIP y guardar archivos en memoria
+            Dictionary<string, byte[]> fotosZip = new();
+            using (var zipStream = archivoZip.OpenReadStream())
+            using (var zip = new System.IO.Compression.ZipArchive(zipStream))
+            {
+                foreach (var entry in zip.Entries)
+                {
+                    if (!string.IsNullOrEmpty(entry.Name) && entry.Length > 0)
+                    {
+                        using var streamEntry = entry.Open();
+                        using var ms = new MemoryStream();
+                        streamEntry.CopyTo(ms);
+                        fotosZip[entry.Name.ToLower()] = ms.ToArray();
+                    }
+                }
+            }
+
+            // Función para normalizar nombres y pasaportes
+            string Normalizar(string texto)
+            {
+                if (string.IsNullOrEmpty(texto)) return "";
+                texto = texto.ToLowerInvariant();
+
+                // Quitar acentos
+                var normalizedString = texto.Normalize(NormalizationForm.FormD);
+                var stringBuilder = new StringBuilder();
+                foreach (var c in normalizedString)
+                {
+                    var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                    if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                        stringBuilder.Append(c);
+                }
+                texto = stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+
+                // Quitar espacios y caracteres no alfanuméricos
+                texto = new string(texto.Where(char.IsLetterOrDigit).ToArray());
+                return texto;
+            }
+
+            // Leer Excel
+            using var stream = new MemoryStream();
+            await archivoExcel.CopyToAsync(stream);
+            using var package = new OfficeOpenXml.ExcelPackage(stream);
+
+            var hoja = package.Workbook.Worksheets[0];
+            int filas = hoja.Dimension.Rows;
+
+            for (int i = 2; i <= filas; i++)
+            {
+                string apellido = hoja.Cells[i, 1].Text.Trim();
+                string nombre = hoja.Cells[i, 2].Text.Trim();
+                string sexoTexto = hoja.Cells[i, 3].Text.Trim().ToLower();
+                string pasaporte = hoja.Cells[i, 4].Text.Trim();
+                string fechaNacimientoTxt = hoja.Cells[i, 5].Text.Trim();
+                string telefono = hoja.Cells[i, 6].Text.Trim();
+                string vencimientoTxt = hoja.Cells[i, 7].Text.Trim();
+
+                // Normalizar clave para comparar
+                string clave = Normalizar($"{nombre}{apellido}{pasaporte}");
+
+                //// Buscar pasajero activo existente
+                //var pasajeroExistente = await _context.Pasajero
+                //    .Where(p => p.Activo)
+                //    .FirstOrDefaultAsync(p => Normalizar(p.Nombre + p.Apellido + p.Pasaporte) == clave);
+
+
+                // Traer solo los pasajeros activos a memoria
+                var pasajerosActivos = await _context.Pasajero
+                    .Where(p => p.Activo)
+                    .ToListAsync();
+
+                // Filtrar usando Normalizar en memoria
+                var pasajeroExistente = pasajerosActivos
+                    .FirstOrDefault(p => Normalizar(p.Nombre + p.Apellido + p.Pasaporte) == clave);
+
+                // Sexo
+                var sexo = _context.Sexo.FirstOrDefault(s => s.Descripcion.ToLower() == sexoTexto);
+                if (sexo == null)
+                {
+                    sexo = new Sexo { Descripcion = char.ToUpper(sexoTexto[0]) + sexoTexto.Substring(1) };
+                    _context.Sexo.Add(sexo);
+                    await _context.SaveChangesAsync();
+                }
+
+                if (pasajeroExistente != null)
+                {
+                    // Actualizar datos existentes
+                    pasajeroExistente.Nombre = nombre;
+                    pasajeroExistente.Apellido = apellido;
+                    pasajeroExistente.SexoId = sexo.Id;
+                    pasajeroExistente.Telefono = telefono;
+                    pasajeroExistente.FechaNacimiento = DateTime.Parse(fechaNacimientoTxt);
+                    pasajeroExistente.Vencimiento = DateTime.Parse(vencimientoTxt);
+
+                    // Actualizar foto si existe
+                    var foto = fotosZip.FirstOrDefault(f => Normalizar(f.Key).Contains(clave));
+                    if (foto.Value != null)
+                    {
+                        string extension = Path.GetExtension(foto.Key);
+                        string nombreFinal = $"{nombre}_{apellido}_{pasaporte}{extension}".ToLower();
+                        string rutaFinal = Path.Combine(rutaFotos, nombreFinal);
+                        System.IO.File.WriteAllBytes(rutaFinal, foto.Value);
+                        pasajeroExistente.FotoPasaporte = nombreFinal;
+                    }
+
+                    _context.Pasajero.Update(pasajeroExistente);
+                }
+                else
+                {
+                    // Crear nuevo pasajero
+                    var pasajero = new Pasajero
+                    {
+                        Nombre = nombre,
+                        Apellido = apellido,
+                        SexoId = sexo.Id,
+                        Pasaporte = pasaporte,
+                        Telefono = telefono,
+                        FechaNacimiento = DateTime.Parse(fechaNacimientoTxt),
+                        Vencimiento = DateTime.Parse(vencimientoTxt)
+                    };
+
+                    // Foto
+                    var foto = fotosZip.FirstOrDefault(f => Normalizar(f.Key).Contains(clave));
+                    if (foto.Value != null)
+                    {
+                        string extension = Path.GetExtension(foto.Key);
+                        string nombreFinal = $"{nombre}_{apellido}_{pasaporte}{extension}".ToLower();
+                        string rutaFinal = Path.Combine(rutaFotos, nombreFinal);
+                        System.IO.File.WriteAllBytes(rutaFinal, foto.Value);
+                        pasajero.FotoPasaporte = nombreFinal;
+                    }
+
+                    _context.Pasajero.Add(pasajero);
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
+            TempData["Mensaje"] = "Importación completada con éxito.";
+            return RedirectToAction("Index");
+        }
+
+
+
     }
 }

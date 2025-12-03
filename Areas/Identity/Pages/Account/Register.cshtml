@@ -1,0 +1,57 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="d-flex justify-content-center align-items-center vh-100"
+     style="background: linear-gradient(135deg, #e3f2fd, #ffffff);">
+
+    <div class="card p-4 shadow-lg border-0" style="width: 380px; border-radius: 15px;">
+
+        <!-- Logo -->
+        <div class="text-center mb-3">
+            <img src="~/Logo/logosetil.png" alt="Logo Setil" style="height:60px;" />
+        </div>
+
+        <h3 class="card-title text-center mb-3 fw-bold text-primary">Registrarse</h3>
+
+        <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            <div asp-validation-summary="All" class="text-danger mb-2"></div>
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label asp-for="Input.Email" class="form-label fw-semibold"></label>
+                <input asp-for="Input.Email" class="form-control form-control-lg" placeholder="Correo electrónico" />
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label asp-for="Input.Password" class="form-label fw-semibold"></label>
+                <input asp-for="Input.Password" class="form-control form-control-lg" placeholder="Contraseña" />
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-3">
+                <label asp-for="Input.ConfirmPassword" class="form-label fw-semibold"></label>
+                <input asp-for="Input.ConfirmPassword" class="form-control form-control-lg" placeholder="Confirmar contraseña" />
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <!-- Botón -->
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" style="border-radius: 10px;">
+                Registrarse
+            </button>
+
+            <div class="mt-3 text-center">
+                <a asp-page="./Login" class="text-decoration-none fw-semibold">¿Ya tenés cuenta? Iniciar sesión</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

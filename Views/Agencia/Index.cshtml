@@ -1,35 +1,102 @@
-﻿@model IEnumerable<ProyetoSetilPF.Models.Agencia>
+﻿@model ProyetoSetilPF.ViewModel.AgenciaVM
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Gestión de Agencias";
 }
 
-<h1>Index</h1>
+<div class="container py-4">
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nombre)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+        <h2 class="fw-bold text-primary">
+            <i class="bi bi-building me-2"></i>Agencias
+        </h2>
+
+        <div class="d-flex gap-2 mt-3 mt-md-0">
+            <a asp-action="Create" class="btn btn-success">
+                <i class="bi bi-plus-circle me-1"></i> Nueva Agencia
+            </a>
+
+            <a asp-action="Eliminadas" class="btn btn-warning text-white">
+                <i class="bi bi-trash-fill me-1"></i> Ver Eliminadas
+            </a>
+        </div>
+    </div>
+
+    <!-- Mensaje -->
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-info">@TempData["Mensaje"]</div>
+    }
+
+    <!-- =========================================== -->
+    <!--                 TABLA (Desktop)             -->
+    <!-- =========================================== -->
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nombre</th>
+                    <th style="width: 220px;">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var agencia in Model.agencia)
+                {
+                    <tr>
+                        <td>@agencia.Nombre</td>
+
+                        <td>
+                            <div class="d-flex gap-1">
+                               
+
+                                <a asp-action="Edit" asp-route-id="@agencia.Id" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-pencil-square me-1"></i> Editar
+                                </a>
+
+                                <a asp-action="Delete" asp-route-id="@agencia.Id" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-trash-fill me-1"></i> Eliminar
+                                </a>
+                            </div>
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- =========================================== -->
+    <!--                 TARJETAS (Mobile)           -->
+    <!-- =========================================== -->
+    <div class="d-block d-md-none">
+
+        @foreach (var agencia in Model.agencia)
+        {
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+
+                    <h5 class="fw-bold text-primary">@agencia.Nombre</h5>
+
+                    <div class="d-grid gap-2 mt-3">
+                        
+
+                        <a asp-action="Edit" asp-route-id="@agencia.Id" class="btn btn-primary btn-sm">
+                            <i class="bi bi-pencil-square me-1"></i> Editar
+                        </a>
+
+                        <a asp-action="Delete" asp-route-id="@agencia.Id" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash-fill me-1"></i> Eliminar
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        }
+        
+    </div>
+    <div class="mt-4">
+        <partial name="_Paginador" for="@Model.paginador" />
+    </div>
+</div>

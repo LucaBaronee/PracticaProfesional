@@ -1,0 +1,26 @@
+﻿@{
+    ViewData["Title"] = "Importar Pasajeros";
+}
+
+<div class="container py-4">
+
+    <h2 class="fw-bold text-primary mb-4">Importar Pasajeros</h2>
+
+    <form asp-action="ImportarPasajeros" enctype="multipart/form-data" method="post" class="card p-4 shadow">
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Archivo Excel (.xlsx)</label>
+            <input type="file" name="archivoExcel" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Archivo ZIP con fotos</label>
+            <input type="file" name="archivoZip" class="form-control" required />
+        </div>
+
+        <button type="submit" class="btn btn-success mt-3 w-100">
+            <i class="bi bi-upload"></i> Importar Datos
+        </button>
+
+    </form>
+</div>
