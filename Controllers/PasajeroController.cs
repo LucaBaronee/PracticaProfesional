@@ -15,6 +15,7 @@ using ProyetoSetilPF.ViewModel;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using System.Globalization;
 using System.Text;
+using ProyetoSetilPF.Data.Migrations;
 
 namespace ProyetoSetilPF.Controllers
 {
@@ -213,10 +214,111 @@ namespace ProyetoSetilPF.Controllers
             return View(pasajero);
         }
 
-        [Authorize(Roles = "Admin,Administracion")]
+        //[Authorize(Roles = "Admin,Administracion")]
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Edit(int id, [Bind("Id,Apellido,Nombre,Edad,SexoId,Pasaporte,FotoPasaporte,FechaNacimiento,Telefono,Vencimiento")] Pasajero pasajero)
+        //{
+        //    if (id != pasajero.Id)
+        //        return NotFound();
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        try
+        //        {
+        //            var pasajeroDb = await _context.Pasajero.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
+        //            if (pasajeroDb == null) return NotFound();
+
+        //            // Mantener la foto anterior si no se subió ninguna
+        //            var nuevaFoto = HttpContext.Request.Form.Files.FirstOrDefault();
+        //            if (nuevaFoto != null && nuevaFoto.Length > 0)
+        //            {
+        //                pasajero.FotoPasaporte = cargarFoto(pasajeroDb.FotoPasaporte);
+        //            }
+        //            else
+        //            {
+        //                pasajero.FotoPasaporte = pasajeroDb.FotoPasaporte;
+        //            }
+
+        //            // Mantener la bandera EnViaje y Activo
+        //            pasajero.EnViaje = pasajeroDb.EnViaje;
+        //            pasajero.Activo = pasajeroDb.Activo;
+
+        //            _context.Update(pasajero);
+        //            await _context.SaveChangesAsync();
+        //        }
+        //        catch (DbUpdateConcurrencyException)
+        //        {
+        //            if (!_context.Pasajero.Any(e => e.Id == pasajero.Id))
+        //                return NotFound();
+        //            else
+        //                throw;
+        //        }
+        //        return RedirectToAction(nameof(Index));
+        //    }
+
+        //    ViewData["SexoId"] = new SelectList(_context.Sexo, "Id", "Descripcion", pasajero.SexoId);
+        //    return View(pasajero);
+        //}
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Edit(int id, [Bind("Id,Apellido,Nombre,Edad,SexoId,Pasaporte,FotoPasaporte,FechaNacimiento,Telefono,Vencimiento")] Pasajero pasajero)
+        //{
+        //    if (id != pasajero.Id)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        try
+        //        {
+        //            // Obtener la entidad original de la base para mantener propiedades que no se editan
+        //            var coordinadorDb = await _context.Coordinador.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+        //            if (coordinadorDb == null) return NotFound();
+
+        //            // Mantener la foto anterior si no se subió ninguna nueva
+        //            var nuevaFoto = HttpContext.Request.Form.Files.FirstOrDefault();
+        //            if (nuevaFoto != null && nuevaFoto.Length > 0)
+        //            {
+        //                pasajero.FotoPasaporte = cargarFoto(coordinadorDb.FotoPasaporte);
+        //            }
+        //            else
+        //            {
+        //                pasajero.FotoPasaporte = coordinadorDb.FotoPasaporte;
+        //            }
+
+        //            // Mantener las banderas o propiedades que no se modifican desde el formulario
+        //            pasajero.Activo = coordinadorDb.Activo;
+        //            pasajero.EnViaje = coordinadorDb.EnViaje; // si aplica
+
+        //            _context.Update(pasajero);
+        //            await _context.SaveChangesAsync();
+        //        }
+        //        catch (DbUpdateConcurrencyException)
+        //        {
+        //            if (!PasajeroExists(pasajero.Id))
+        //            {
+        //                return NotFound();
+        //            }
+        //            else
+        //            {
+        //                throw;
+        //            }
+        //        }
+        //        return RedirectToAction(nameof(Index));
+        //    }
+
+        //    ViewData["SexoId"] = new SelectList(_context.Sexo, "Id", "Descripcion", pasajero.SexoId);
+        //    return View(pasajero);
+        //}
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Apellido,Nombre,Edad,SexoId,Pasaporte,FotoPasaporte,FechaNacimiento,Telefono,Vencimiento")] Pasajero pasajero)
+        public async Task<IActionResult> Edit(int id,
+    [Bind("Id,Apellido,Nombre,SexoId,Pasaporte,FechaNacimiento,Telefono,Vencimiento,FotoPasaporte")] Pasajero pasajero)
         {
             if (id != pasajero.Id)
                 return NotFound();
@@ -225,11 +327,17 @@ namespace ProyetoSetilPF.Controllers
             {
                 try
                 {
-                    var pasajeroDb = await _context.Pasajero.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
-                    if (pasajeroDb == null) return NotFound();
+                    // Obtener datos anteriores para no perder nada
+                    var pasajeroDb = await _context.Pasajero
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(p => p.Id == id);
 
-                    // Mantener la foto anterior si no se subió ninguna
+                    if (pasajeroDb == null)
+                        return NotFound();
+
+                    // FOTO PASAPORTE
                     var nuevaFoto = HttpContext.Request.Form.Files.FirstOrDefault();
+
                     if (nuevaFoto != null && nuevaFoto.Length > 0)
                     {
                         pasajero.FotoPasaporte = cargarFoto(pasajeroDb.FotoPasaporte);
@@ -239,9 +347,9 @@ namespace ProyetoSetilPF.Controllers
                         pasajero.FotoPasaporte = pasajeroDb.FotoPasaporte;
                     }
 
-                    // Mantener la bandera EnViaje y Activo
-                    pasajero.EnViaje = pasajeroDb.EnViaje;
+                    // Mantener propiedades no editables
                     pasajero.Activo = pasajeroDb.Activo;
+                    pasajero.EnViaje = pasajeroDb.EnViaje;
 
                     _context.Update(pasajero);
                     await _context.SaveChangesAsync();
@@ -253,12 +361,15 @@ namespace ProyetoSetilPF.Controllers
                     else
                         throw;
                 }
+
                 return RedirectToAction(nameof(Index));
             }
 
             ViewData["SexoId"] = new SelectList(_context.Sexo, "Id", "Descripcion", pasajero.SexoId);
             return View(pasajero);
         }
+
+
 
 
 

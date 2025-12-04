@@ -34,7 +34,7 @@ namespace ProyetoSetilPF
 
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-            builder.Services.AddScoped<IUserValidator<IdentityUser>, CustomUserValidator>();
+            //builder.Services.AddScoped<IUserValidator<IdentityUser>, CustomUserValidator>();
             var app = builder.Build();
 
             // Middleware
@@ -80,8 +80,8 @@ namespace ProyetoSetilPF
                 }
 
                 // 2️⃣ Crear Admin inicial si no existe
-                string adminEmail = "lucas12@gmail.com";
-                string adminPassword = "Lucas123."; // Cambialo por uno seguro
+                string adminEmail = "admin@admin.com";
+                string adminPassword = "Admin123."; // Cambialo por uno seguro
 
                 var adminUser = await userManager.FindByEmailAsync(adminEmail);
                 if (adminUser == null)

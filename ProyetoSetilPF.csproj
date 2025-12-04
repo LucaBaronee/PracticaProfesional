@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="wwwroot\fotos\" />
     <Folder Include="wwwroot\fotos_pasp\" />
     <Folder Include="wwwroot\uploads\Viajes\1\" />
   </ItemGroup>

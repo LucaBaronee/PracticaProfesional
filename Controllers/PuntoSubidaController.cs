@@ -22,7 +22,7 @@ namespace ProyetoSetilPF.Controllers
         }
 
         // GET: PuntoSubida
-        public async Task<IActionResult> Index(int pagina = 1)
+        public async Task<IActionResult> Index(string busqNombre, int pagina = 1)
         {
 
             Paginador paginas = new Paginador();
@@ -31,7 +31,12 @@ namespace ProyetoSetilPF.Controllers
 
             IQueryable<PuntoSubida> applicationDbContext = _context.puntoSubida
                 .Where(p => p.Activo);
+            if (!string.IsNullOrEmpty(busqNombre))
+            {
+                applicationDbContext = applicationDbContext.Where(e => e.Descripcion.Contains(busqNombre));
+                paginas.ValoresQueryString.Add("busquedaNombre", busqNombre);
 
+            }
 
             paginas.TotalRegistros = applicationDbContext.Count();
             var mostrarRegistros = applicationDbContext
@@ -41,7 +46,7 @@ namespace ProyetoSetilPF.Controllers
 
             PuntoSubidaVM datos = new PuntoSubidaVM()
             {
-              
+                busquedaNombre = busqNombre,
                 puntosubida = mostrarRegistros.ToList(),
                 paginador = paginas,
             };

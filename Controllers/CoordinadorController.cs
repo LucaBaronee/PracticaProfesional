@@ -192,51 +192,7 @@ namespace ProyetoSetilPF.Controllers
             return View(coordinador);
         }
 
-        // POST: Coordinador/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Edit(int id, [Bind("Id,Apellido,Nombre,Edad,SexoId,Pasaporte,FotoPasaporte,Vencimiento,FechaNacimiento,Telefono,Email")] Coordinador coordinador)
-        //{
-        //    if (id != coordinador.Id)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    if (ModelState.IsValid)
-        //    {
-        //        try
-        //        {
-        //            // Mantener la foto anterior si no se subió ninguna
-        //            var nuevaFoto = HttpContext.Request.Form.Files.FirstOrDefault();
-        //            if (nuevaFoto != null && nuevaFoto.Length > 0)
-        //            {
-        //                coordinador.FotoPasaporte = cargarFoto(coordinador.FotoPasaporte);
-        //            }
-        //            else
-        //            {
-        //                coordinador.FotoPasaporte = coordinador.FotoPasaporte;
-        //            }
-        //            _context.Update(coordinador);
-        //            await _context.SaveChangesAsync();
-        //        }
-        //        catch (DbUpdateConcurrencyException)
-        //        {
-        //            if (!CoordinadorExists(coordinador.Id))
-        //            {
-        //                return NotFound();
-        //            }
-        //            else
-        //            {
-        //                throw;
-        //            }
-        //        }
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    ViewData["SexoId"] = new SelectList(_context.Sexo, "Id", "Descripcion", coordinador.SexoId);
-        //    return View(coordinador);
-        //}
+        
 
         [HttpPost]
         [ValidateAntiForgeryToken]

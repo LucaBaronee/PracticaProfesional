@@ -13,13 +13,15 @@
         {
             <li style="margin-bottom:5px;">
                 <a href="@doc.RutaArchivo" target="_blank">@doc.NombreArchivo</a>
-
-                <!-- Botón Eliminar con confirmación -->
-                <form asp-action="EliminarDocumento" method="post" style="display:inline;"
-                      onsubmit="return confirm('¿Está seguro que desea eliminar este archivo?');">
-                    <input type="hidden" name="documentoId" value="@doc.Id" />
-                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
-                </form>
+                @if (User.IsInRole("Admin") || User.IsInRole("Administracion"))
+                {
+                    <form asp-action="EliminarDocumento" method="post" style="display:inline;"
+                          onsubmit="return confirm('¿Está seguro que desea eliminar este archivo?');">
+                        <input type="hidden" name="documentoId" value="@doc.Id" />
+                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                    </form>
+                }
+                
             </li>
         }
     </ul>

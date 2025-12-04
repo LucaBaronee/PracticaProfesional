@@ -5,7 +5,7 @@
 <form method="get" asp-action="AgregarCiudad">
     <input type="hidden" name="viajeId" value="@ViewBag.ViajeId" />
     <div class="input-group mb-3">
-        <input type="text" name="busqueda" value="@Model.busqNombre" class="form-control" placeholder="Buscar ciudad...">
+        <input type="text" name="busqueda" value="@Model.busquedaNombre" class="form-control" placeholder="Buscar ciudad...">
         <button type="submit" class="btn btn-primary">Buscar</button>
     </div>
 </form>
@@ -35,3 +35,6 @@
         }
     </tbody>
 </table>
+<div class="mt-4">
+    <partial name="_Paginador" for="@Model.paginador" />
+</div>

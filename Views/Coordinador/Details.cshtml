@@ -93,9 +93,13 @@
             <i class="bi bi-person-badge me-2"></i>@Model.Nombre @Model.Apellido
         </h2>
         <div class="d-flex flex-wrap gap-2">
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
-                <i class="bi bi-pencil-square me-1"></i> Editar
-            </a>
+            @if (User.IsInRole("Admin") || User.IsInRole("Administracion"))
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="bi bi-pencil-square me-1"></i> Editar
+                </a>
+            }
+
             <a asp-action="Index" class="btn btn-secondary">
                 <i class="bi bi-arrow-left-circle me-1"></i> Volver
             </a>

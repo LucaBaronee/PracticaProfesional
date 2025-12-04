@@ -110,13 +110,17 @@
                     <a asp-controller="Coordinador" asp-action="Details" asp-route-id="@coord.Id" class="btn btn-sm btn-info">
                         <i class="bi bi-eye-fill me-1"></i> Ver
                     </a>
-                    <form asp-action="EliminarCoordinadorDelViaje" method="post" onsubmit="return confirm('¿Seguro que deseas quitar este coordinador del viaje?');">
-                        <input type="hidden" name="viajeId" value="@ViewBag.ViajeId" />
-                        <input type="hidden" name="coordinadorId" value="@coord.Id" />
-                        <button type="submit" class="btn btn-sm btn-danger">
-                            <i class="bi bi-person-dash-fill me-1"></i> Quitar
-                        </button>
-                    </form>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Administracion")) 
+                    {
+                        <form asp-action="EliminarCoordinadorDelViaje" method="post" onsubmit="return confirm('¿Seguro que deseas quitar este coordinador del viaje?');">
+                            <input type="hidden" name="viajeId" value="@ViewBag.ViajeId" />
+                            <input type="hidden" name="coordinadorId" value="@coord.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="bi bi-person-dash-fill me-1"></i> Quitar
+                            </button>
+                        </form>
+                    }
+                    
                     
 
                 </td>

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using ProyetoSetilPF.Data;
 using ProyetoSetilPF.Models;
+using ProyetoSetilPF.ViewModel;
 
 namespace ProyetoSetilPF.Controllers
 {
@@ -39,8 +40,10 @@ namespace ProyetoSetilPF.Controllers
                 using (var package = new ExcelPackage(archivo.OpenReadStream()))
                 {
                     var worksheet = package.Workbook.Worksheets[0];
-
                     var ciudades = new List<Ciudad>();
+
+                    // Obtener nombres ya existentes en la base de datos
+                    var nombresExistentes = _context.Ciudad.Select(c => c.Descripcion).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
                     // Saltar encabezado
                     int startRow = worksheet.Dimension.Start.Row + 1;
@@ -48,15 +51,17 @@ namespace ProyetoSetilPF.Controllers
 
                     for (int row = startRow; row <= endRow; row++)
                     {
-                        string descripcion = worksheet.Cells[row, 1].Text;
-                        string codigoPostalTexto = worksheet.Cells[row, 2].Text;
+                        string descripcion = worksheet.Cells[row, 1].Text?.Trim();
+                        string codigoPostalTexto = worksheet.Cells[row, 2].Text?.Trim();
 
                         if (string.IsNullOrWhiteSpace(descripcion))
                             continue;
 
-                        int codigoPostal = 0;
+                        // Saltar si ya existe
+                        if (nombresExistentes.Contains(descripcion))
+                            continue;
 
-                        // Intentar convertir el código postal a número
+                        int codigoPostal = 0;
                         int.TryParse(codigoPostalTexto, out codigoPostal);
 
                         var ciudad = new Ciudad
@@ -66,13 +71,20 @@ namespace ProyetoSetilPF.Controllers
                         };
 
                         ciudades.Add(ciudad);
+                        nombresExistentes.Add(descripcion); // Añadir al HashSet para evitar duplicados dentro del mismo Excel
                     }
 
-                    _context.Ciudad.AddRange(ciudades);
-                    await _context.SaveChangesAsync();
+                    if (ciudades.Any())
+                    {
+                        _context.Ciudad.AddRange(ciudades);
+                        await _context.SaveChangesAsync();
+                        TempData["Mensaje"] = "Ciudades importadas exitosamente.";
+                    }
+                    else
+                    {
+                        TempData["Mensaje"] = "No se importaron ciudades nuevas (ya existían en la base de datos).";
+                    }
                 }
-
-                TempData["Mensaje"] = "Ciudades importadas exitosamente.";
             }
             catch (Exception ex)
             {
@@ -88,9 +100,33 @@ namespace ProyetoSetilPF.Controllers
 
 
         // GET: Ciuda
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string busqNombre,int pagina = 1)
         {
-            return View(await _context.Ciudad.ToListAsync());
+            Paginador paginas = new Paginador();
+            paginas.PaginaActual = pagina;
+            paginas.RegistrosPorPagina = 10;
+            IQueryable<Ciudad> applicationDbContext = _context.Ciudad
+                .Where(c => c.Activo);
+
+            if (!string.IsNullOrEmpty(busqNombre))
+            {
+                applicationDbContext = applicationDbContext.Where(e => e.Descripcion.Contains(busqNombre));
+                paginas.ValoresQueryString.Add("busquedaNombre", busqNombre);
+
+            };
+
+            paginas.TotalRegistros = applicationDbContext.Count();
+            var mostrarRegistros = applicationDbContext
+                            .Skip((pagina - 1) * paginas.RegistrosPorPagina)
+                            .Take(paginas.RegistrosPorPagina);
+            CiudadVM datos = new CiudadVM()
+            {
+                busquedaNombre = busqNombre,
+                ciudad = mostrarRegistros.ToList(),
+                paginador = paginas,
+                
+            };
+            return View(datos);
         }
 
         // GET: Ciudad/Details/5

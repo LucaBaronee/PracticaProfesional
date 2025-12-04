@@ -11,9 +11,13 @@
             <i class="bi bi-building me-2"></i>@Model.Descripcion
         </h2>
         <div>
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary me-2">
-                <i class="bi bi-pencil-square me-1"></i> Editar
-            </a>
+            @if (User.IsInRole("Admin") || User.IsInRole("Administracion")) 
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary me-2">
+                    <i class="bi bi-pencil-square me-1"></i> Editar
+                </a>
+            }
+            
             <a asp-action="Index" class="btn btn-secondary">
                 <i class="bi bi-arrow-left-circle me-1"></i> Volver
             </a>
